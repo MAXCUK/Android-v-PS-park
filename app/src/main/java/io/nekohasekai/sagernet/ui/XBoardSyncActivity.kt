@@ -1,0 +1,161 @@
+package io.nekohasekai.sagernet.ui
+
+import android.content.Intent
+import android.os.Bundle
+import android.text.InputType
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.ktx.alert
+import io.nekohasekai.sagernet.ktx.onMainDispatcher
+import io.nekohasekai.sagernet.ktx.readableMessage
+import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
+import io.nekohasekai.sagernet.xboard.XBoardSyncManager
+import java.text.DateFormat
+import java.util.Date
+
+class XBoardSyncActivity : ThemedActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.layout_xboard_sync)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = getString(R.string.menu_xboard_sync)
+
+        val emailInput = findViewById<EditText>(R.id.xboard_email)
+        val passwordInput = findViewById<EditText>(R.id.xboard_password)
+        val syncButton = findViewById<Button>(R.id.xboard_sync_button)
+        val refreshButton = findViewById<Button>(R.id.xboard_refresh_button)
+        val openGroupButton = findViewById<Button>(R.id.xboard_open_group_button)
+        val statusView = findViewById<TextView>(R.id.xboard_status)
+        val trafficView = findViewById<TextView>(R.id.xboard_traffic)
+        val expiryView = findViewById<TextView>(R.id.xboard_expiry)
+
+        passwordInput.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        emailInput.setText(DataStore.xboardEmail)
+        renderStatus(statusView, trafficView, expiryView)
+        openGroupButton.visibility = if (DataStore.xboardLastGroupId > 0) View.VISIBLE else View.GONE
+
+        syncButton.setOnClickListener {
+            val email = emailInput.text?.toString().orEmpty().trim()
+            val password = passwordInput.text?.toString().orEmpty().trim()
+            syncButton.isEnabled = false
+            refreshButton.isEnabled = false
+            statusView.text = getString(R.string.xboard_sync_running)
+            runOnDefaultDispatcher {
+                runCatching {
+                    val result = XBoardSyncManager.loginAndSync(email, password, DataStore.xboardPanelName)
+                    DataStore.xboardEmail = result.email
+                    DataStore.xboardPanelName = result.panelName
+                    DataStore.xboardLastGroupId = result.groupId
+                    DataStore.xboardLastSyncAt = System.currentTimeMillis()
+                    DataStore.xboardTrafficUsed = result.usedTraffic
+                    DataStore.xboardTrafficTotal = result.totalTraffic
+                    DataStore.xboardExpireAt = result.expiredAt
+                }.onSuccess {
+                    onMainDispatcher {
+                        syncButton.isEnabled = true
+                        refreshButton.isEnabled = true
+                        openGroupButton.visibility = View.VISIBLE
+                        renderStatus(statusView, trafficView, expiryView)
+                    }
+                }.onFailure {
+                    onMainDispatcher {
+                        syncButton.isEnabled = true
+                        refreshButton.isEnabled = true
+                        renderStatus(statusView, trafficView, expiryView)
+                        alert(it.readableMessage).show()
+                    }
+                }
+            }
+        }
+
+        refreshButton.setOnClickListener {
+            val email = emailInput.text?.toString().orEmpty().trim()
+            val password = passwordInput.text?.toString().orEmpty().trim()
+            if (email.isBlank() || password.isBlank()) {
+                renderStatus(statusView, trafficView, expiryView)
+                return@setOnClickListener
+            }
+            syncButton.isEnabled = false
+            refreshButton.isEnabled = false
+            statusView.text = getString(R.string.xboard_sync_running)
+            runOnDefaultDispatcher {
+                runCatching {
+                    val result = XBoardSyncManager.loginAndSync(email, password, DataStore.xboardPanelName)
+                    DataStore.xboardEmail = result.email
+                    DataStore.xboardPanelName = result.panelName
+                    DataStore.xboardLastGroupId = result.groupId
+                    DataStore.xboardLastSyncAt = System.currentTimeMillis()
+                    DataStore.xboardTrafficUsed = result.usedTraffic
+                    DataStore.xboardTrafficTotal = result.totalTraffic
+                    DataStore.xboardExpireAt = result.expiredAt
+                }.onSuccess {
+                    onMainDispatcher {
+                        syncButton.isEnabled = true
+                        refreshButton.isEnabled = true
+                        openGroupButton.visibility = View.VISIBLE
+                        renderStatus(statusView, trafficView, expiryView)
+                    }
+                }.onFailure {
+                    onMainDispatcher {
+                        syncButton.isEnabled = true
+                        refreshButton.isEnabled = true
+                        renderStatus(statusView, trafficView, expiryView)
+                        alert(it.readableMessage).show()
+                    }
+                }
+            }
+        }
+
+        openGroupButton.setOnClickListener {
+            DataStore.selectedGroup = DataStore.xboardLastGroupId
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
+    }
+
+    private fun renderStatus(statusView: TextView, trafficView: TextView, expiryView: TextView) {
+        val last = DataStore.xboardLastSyncAt
+        statusView.text = if (last > 0) {
+            getString(R.string.xboard_sync_last_status, DateFormat.getDateTimeInstance().format(Date(last)))
+        } else {
+            getString(R.string.xboard_sync_never)
+        }
+
+        val used = DataStore.xboardTrafficUsed
+        val total = DataStore.xboardTrafficTotal
+        if (total > 0) {
+            val remaining = (total - used).coerceAtLeast(0)
+            trafficView.visibility = View.VISIBLE
+            trafficView.text = getString(
+                R.string.xboard_sync_traffic_status,
+                android.text.format.Formatter.formatFileSize(this, used),
+                android.text.format.Formatter.formatFileSize(this, total),
+                android.text.format.Formatter.formatFileSize(this, remaining)
+            )
+        } else {
+            trafficView.visibility = View.GONE
+        }
+
+        val expireAt = DataStore.xboardExpireAt
+        if (expireAt > 0) {
+            expiryView.visibility = View.VISIBLE
+            expiryView.text = getString(
+                R.string.xboard_sync_expiry_status,
+                DateFormat.getDateTimeInstance().format(Date(expireAt * 1000))
+            )
+        } else {
+            expiryView.visibility = View.GONE
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
+    }
+}
