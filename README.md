@@ -12,4 +12,4 @@
 ./scripts/build-debug.sh
 ```
 
-如果要正式发布包，后续再补签名配置和真实 sing-box 运行时即可。
+如果要正式发布包，现在已支持通过 `keystore.properties` 接入签名；真实 sing-box 运行时仍需后续补入。

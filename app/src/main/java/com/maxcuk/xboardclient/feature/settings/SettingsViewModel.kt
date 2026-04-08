@@ -2,10 +2,12 @@ package com.maxcuk.xboardclient.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxcuk.xboardclient.core.datastore.ConnectionPrefs
 import com.maxcuk.xboardclient.core.vpn.VpnController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 data class SettingsUiState(
@@ -23,6 +25,10 @@ class SettingsViewModel(
         viewModelScope.launch {
             vpnController.setAutoReconnect(enabled)
             _uiState.value = _uiState.value.copy(autoReconnect = enabled, message = "设置已保存")
+        }
+    }
+}
+(autoReconnect = enabled, message = "设置已保存")
         }
     }
 }

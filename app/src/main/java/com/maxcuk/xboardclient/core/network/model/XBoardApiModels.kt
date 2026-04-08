@@ -24,7 +24,8 @@ data class GuestConfigResponse(
     val telegram_discuss_link: String? = null,
     val telegram_bot_username: String? = null,
     val tos_url: String? = null,
-    val safe_mode_enable: Int? = null
+    val safe_mode_enable: Int? = null,
+    val api_base: String? = null
 )
 
 data class UserInfoResponse(

@@ -14,8 +14,8 @@ class NodeRefreshWorker(
     override suspend fun doWork(): Result {
         return runCatching {
             val container = (applicationContext as XBoardClientApplication).container
-            val session = container.authRepository.currentSession() ?: return Result.retry()
-            val remote = XBoardRemoteDataSource(NetworkFactory.create(session.baseUrl))
+            val session = container.authRepository.currentSession() ?: return Result.success()
+            val remote = XBoardRemoteDataSource(NetworkFactory.create(session.baseUrl), session.baseUrl)
             val servers = remote.fetchServers(session.authToken)
             container.nodeRepository.replaceNodes(servers)
             Result.success()

@@ -38,9 +38,13 @@ class AuthViewModel(
         viewModelScope.launch {
             runCatching {
                 _uiState.value = AuthUiState(isLoading = true, siteName = _uiState.value.siteName)
-                val remote = XBoardRemoteDataSource(NetworkFactory.create(baseUrl))
+                val normalizedBaseUrl = NetworkFactory.normalizeBaseUrl(baseUrl)
+                val remote = XBoardRemoteDataSource(NetworkFactory.create(normalizedBaseUrl), normalizedBaseUrl)
                 val token = remote.login(email, password)
-                authRepository.saveSession(baseUrl, email, token)
+                authRepository.saveSession(normalizedBaseUrl, email, token)
+                val servers = remote.fetchServers(token)
+                nodeRepository.replaceNodes(servers)
+                refreshScheduler(true)
             }.onSuccess {
                 _uiState.value = _uiState.value.copy(isLoading = false, isSuccess = true)
                 onSuccess()

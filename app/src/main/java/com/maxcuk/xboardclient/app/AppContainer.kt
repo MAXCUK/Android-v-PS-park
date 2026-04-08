@@ -8,11 +8,15 @@ import com.maxcuk.xboardclient.core.repository.AuthRepository
 import com.maxcuk.xboardclient.core.repository.NodeRepository
 import com.maxcuk.xboardclient.core.vpn.VpnController
 
-class AppContainer(context: Context) {
+class AppContainer(private val context: Context) {
     private val database = DatabaseFactory.create(context)
-    private val connectionPrefs = ConnectionPrefs(context)
+    val connectionPrefs = ConnectionPrefs(context)
     val authRepository = AuthRepository(database.sessionDao())
     val nodeRepository = NodeRepository(database.nodeDao(), connectionPrefs)
     private val proxyRuntimeManager = ProxyRuntimeManager(context)
     val vpnController = VpnController(context, nodeRepository, proxyRuntimeManager, connectionPrefs)
+
+    fun setRefreshEnabled(enabled: Boolean) {
+        if (enabled) RefreshScheduler.schedule(context) else RefreshScheduler.cancel(context)
+    }
 }

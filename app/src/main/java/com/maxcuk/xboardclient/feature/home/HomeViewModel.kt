@@ -43,7 +43,7 @@ class HomeViewModel(
             runCatching {
                 _uiState.value = _uiState.value.copy(isLoading = true, error = null)
                 val session = authRepository.currentSession() ?: error("未登录")
-                val remote = XBoardRemoteDataSource(NetworkFactory.create(session.baseUrl))
+                val remote = XBoardRemoteDataSource(NetworkFactory.create(session.baseUrl), session.baseUrl)
                 val userInfo = remote.getUserInfo(session.authToken)
                 val servers = remote.fetchServers(session.authToken)
                 nodeRepository.replaceNodes(servers)

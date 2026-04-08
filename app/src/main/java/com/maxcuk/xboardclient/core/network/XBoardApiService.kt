@@ -30,4 +30,10 @@ interface XBoardApiService {
     suspend fun fetchServers(
         @Header("Authorization") authorization: String
     ): Response<ApiResponse<List<ServerRouteResponse>>>
+
+    @GET
+    suspend fun fetchSubscriptionByUrl(
+        @Url url: String,
+        @Header("Authorization") authorization: String? = null
+    ): Response<ResponseBody>
 }

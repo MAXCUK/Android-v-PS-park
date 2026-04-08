@@ -7,15 +7,19 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object NetworkFactory {
+    fun normalizeBaseUrl(baseUrl: String): String {
+        return when {
+            baseUrl.startsWith("http://") || baseUrl.startsWith("https://") -> baseUrl
+            else -> "https://$baseUrl"
+        }.trim().let { if (it.endsWith('/')) it else "$it/" }
+    }
+
     fun create(baseUrl: String): XBoardApiService {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BASIC
         }
 
-        val normalizedBaseUrl = when {
-            baseUrl.startsWith("http://") || baseUrl.startsWith("https://") -> baseUrl
-            else -> "https://$baseUrl"
-        }.let { if (it.endsWith('/')) it else "$it/" }
+        val normalizedBaseUrl = normalizeBaseUrl(baseUrl)
 
         val client = OkHttpClient.Builder()
             .addInterceptor(logging)

@@ -33,13 +33,19 @@ object Routes {
 
 @Composable
 fun XBoardNavHost(navController: NavHostController, container: AppContainer) {
-    val authViewModel = remember { AuthViewModel(container.authRepository) }
+    val authViewModel = remember {
+        AuthViewModel(
+            container.authRepository,
+            container.nodeRepository,
+            container::setRefreshEnabled
+        )
+    }
     val homeViewModel = remember { HomeViewModel(container.authRepository, container.nodeRepository, container.vpnController) }
     val nodesViewModel = remember { NodesViewModel(container.nodeRepository) }
     val profileViewModel = remember { ProfileViewModel(container.authRepository) }
     val logsViewModel = remember { LogsViewModel(container.vpnController) }
     val nodeDetailViewModel = remember { NodeDetailViewModel(container.nodeRepository) }
-    val settingsViewModel = remember { SettingsViewModel(container.vpnController) }
+    val settingsViewModel = remember { SettingsViewModel(container.vpnController, container.connectionPrefs) }
 
     NavHost(navController = navController, startDestination = Routes.AUTH) {
         composable(Routes.AUTH) {

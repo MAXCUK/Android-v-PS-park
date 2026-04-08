@@ -1,8 +1,21 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
 }
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+}
+
+fun readSecret(key: String): String? =
+    keystoreProperties.getProperty(key)
+        ?: System.getenv(key)
+        ?: System.getenv(key.uppercase())
 
 android {
     namespace = "com.maxcuk.xboardclient"

@@ -20,6 +20,11 @@
 ./scripts/build-release.sh
 ```
 
+## Release 签名
+1. 复制 `keystore.properties.example` 为 `keystore.properties`
+2. 填入：`storeFile`、`storePassword`、`keyAlias`、`keyPassword`
+3. 重新执行 `./scripts/build-release.sh`
+
 ## 输出目录
 - Debug APK: `app/build/outputs/apk/debug/`
 - Release APK: `app/build/outputs/apk/release/`
