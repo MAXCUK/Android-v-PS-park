@@ -27,7 +27,7 @@ class SingBoxRuntimeBridge(
         }
     }
 
-    fun expectedBinaryPath(): String = "jniLibs/${android.os.Build.SUPPORTED_ABIS.firstOrNull().orEmpty()}/$binaryFileName()"
+    fun expectedBinaryPath(): String = "jniLibs/${android.os.Build.SUPPORTED_ABIS.firstOrNull().orEmpty()}/${binaryFileName()}"
 
     fun installedBinaryFile(): File = File(context.applicationInfo.nativeLibraryDir, binaryFileName())
 

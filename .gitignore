@@ -1,2 +1,5 @@
 .keys/
 local.properties
+.gradle/
+app/build/
+build/
