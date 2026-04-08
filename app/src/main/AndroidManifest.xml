@@ -9,9 +9,8 @@
     <application
         android:name=".app.XBoardClientApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@android:drawable/sym_def_app_icon"
         android:label="XBoard Client"
-        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.XBoardClient">
 
