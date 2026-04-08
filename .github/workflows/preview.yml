@@ -1,5 +1,8 @@
 name: Preview Build
 on:
+  push:
+    branches:
+      - nekobox-xboard-actions
   workflow_dispatch:
     inputs:
 jobs:
