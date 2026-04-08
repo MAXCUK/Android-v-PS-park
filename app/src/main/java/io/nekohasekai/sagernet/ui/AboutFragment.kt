@@ -10,7 +10,6 @@ import com.danielstone.materialaboutlibrary.model.MaterialAboutCard
 import com.danielstone.materialaboutlibrary.model.MaterialAboutList
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.databinding.LayoutAboutBinding
-import io.nekohasekai.sagernet.ktx.Lists
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.widget.ListListener
 import libcore.Libcore
