@@ -20,6 +20,8 @@ data class AuthData(
 
 data class GuestConfigResponse(
     val app_name: String? = null,
+    val app_description: String? = null,
+    val app_url: String? = null,
     val subscribe_url: String? = null,
     val telegram_discuss_link: String? = null,
     val telegram_bot_username: String? = null,

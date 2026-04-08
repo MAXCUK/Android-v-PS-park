@@ -16,19 +16,22 @@ data class SettingsUiState(
 )
 
 class SettingsViewModel(
-    private val vpnController: VpnController
+    private val vpnController: VpnController,
+    private val connectionPrefs: ConnectionPrefs
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(autoReconnect = connectionPrefs.autoReconnect.firstOrNull() ?: true)
+        }
+    }
 
     fun setAutoReconnect(enabled: Boolean) {
         viewModelScope.launch {
             vpnController.setAutoReconnect(enabled)
             _uiState.value = _uiState.value.copy(autoReconnect = enabled, message = "设置已保存")
-        }
-    }
-}
-(autoReconnect = enabled, message = "设置已保存")
         }
     }
 }

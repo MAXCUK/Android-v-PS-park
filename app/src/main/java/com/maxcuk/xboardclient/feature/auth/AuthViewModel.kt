@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.maxcuk.xboardclient.core.network.NetworkFactory
 import com.maxcuk.xboardclient.core.network.XBoardRemoteDataSource
 import com.maxcuk.xboardclient.core.repository.AuthRepository
+import com.maxcuk.xboardclient.core.repository.NodeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +19,9 @@ data class AuthUiState(
 )
 
 class AuthViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val nodeRepository: NodeRepository,
+    private val refreshScheduler: (Boolean) -> Unit
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -26,8 +29,9 @@ class AuthViewModel(
     fun preloadSite(baseUrl: String) {
         viewModelScope.launch {
             runCatching {
-                val remote = XBoardRemoteDataSource(NetworkFactory.create(baseUrl))
-                remote.fetchGuestConfig()?.app_name
+                val normalizedBaseUrl = NetworkFactory.normalizeBaseUrl(baseUrl)
+                val remote = XBoardRemoteDataSource(NetworkFactory.create(normalizedBaseUrl), normalizedBaseUrl)
+                remote.fetchGuestConfig()?.let { it.app_name ?: it.app_description ?: it.app_url }
             }.onSuccess {
                 _uiState.value = _uiState.value.copy(siteName = it)
             }
