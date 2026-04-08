@@ -349,29 +349,6 @@ class ConfigurationFragment @JvmOverloads constructor(
                 startActivity(Intent(requireActivity(), XBoardSyncActivity::class.java))
             }
 
-            R.id.action_scan_qr_code,
-            R.id.action_import_clipboard,
-            R.id.action_import_file,
-            R.id.action_new_socks,
-            R.id.action_new_http,
-            R.id.action_new_ss,
-            R.id.action_new_vmess,
-            R.id.action_new_vless,
-            R.id.action_new_trojan,
-            R.id.action_new_trojan_go,
-            R.id.action_new_mieru,
-            R.id.action_new_naive,
-            R.id.action_new_hysteria,
-            R.id.action_new_tuic,
-            R.id.action_new_ssh,
-            R.id.action_new_wg,
-            R.id.action_new_shadowtls,
-            R.id.action_new_anytls,
-            R.id.action_new_config,
-            R.id.action_new_chain -> {
-                startActivity(Intent(requireActivity(), XBoardSyncActivity::class.java))
-            }
-
             R.id.action_update_subscription -> {
                 val group = DataStore.currentGroup()
                 if (group.type != GroupType.SUBSCRIPTION) {
