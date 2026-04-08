@@ -9,7 +9,6 @@ import android.net.VpnService
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.maxcuk.xboardclient.MainActivity
-import com.maxcuk.xboardclient.R
 
 class XBoardVpnService : VpnService() {
 
@@ -47,7 +46,7 @@ class XBoardVpnService : VpnService() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_sys_download_done)
-            .setContentTitle(getString(R.string.app_name))
+            .setContentTitle("XBoard Client")
             .setContentText(text)
             .setContentIntent(pendingIntent)
             .setOngoing(true)

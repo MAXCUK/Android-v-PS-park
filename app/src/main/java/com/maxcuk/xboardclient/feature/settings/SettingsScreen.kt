@@ -28,7 +28,7 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("设置")
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween) {
             Text("自动重连")
             Switch(checked = uiState.autoReconnect, onCheckedChange = viewModel::setAutoReconnect)
         }

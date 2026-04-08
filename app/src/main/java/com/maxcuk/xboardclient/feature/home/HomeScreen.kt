@@ -72,7 +72,10 @@ fun HomeScreen(
                 Text("运行库：${uiState.runtimeBinaryPath}")
                 Text("日志文件：${uiState.runtimeLogPath}")
                 Text("最新日志：${uiState.latestLogLine ?: "--"}")
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text("自动重连")
                     Switch(checked = uiState.autoReconnect, onCheckedChange = viewModel::setAutoReconnect)
                 }
@@ -85,11 +88,11 @@ fun HomeScreen(
             }
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = onOpenNodes) { Text("节点列表") }
-            Button(onClick = onOpenProfile) { Text("账户信息") }
-            Button(onClick = onOpenLogs) { Text("运行日志") }
-            Button(onClick = onOpenSettings) { Text("设置") }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = onOpenNodes, modifier = Modifier.fillMaxWidth()) { Text("节点列表") }
+            Button(onClick = onOpenProfile, modifier = Modifier.fillMaxWidth()) { Text("账户信息") }
+            Button(onClick = onOpenLogs, modifier = Modifier.fillMaxWidth()) { Text("运行日志") }
+            Button(onClick = onOpenSettings, modifier = Modifier.fillMaxWidth()) { Text("设置") }
         }
     }
 }
