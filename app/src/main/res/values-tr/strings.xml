@@ -55,9 +55,9 @@
     <string name="group_delete_confirm_prompt">Bu grubu silmek istediğinize emin misiniz\?</string>
     <string name="group_diff">Fark (%s)</string>
     <string name="group_show_diff">Fark</string>
-    <string name="group_updated">%s: %d vekil sunucu güncellendi</string>
+    <string name="group_updated" formatted="false">%s: %d vekil sunucu güncellendi</string>
     <string name="group_no_difference">%s: Farklılık yok</string>
-    <string name="group_status_proxies_subscription">%d Vekil Sunucu | %s güncellendi</string>
+    <string name="group_status_proxies_subscription" formatted="false">%d Vekil Sunucu | %s güncellendi</string>
     <string name="group_status_proxies">%d Vekil Sunucu</string>
     <string name="group_status_empty_subscription">Henüz güncellenmedi</string>
     <string name="group_status_empty">Boş grup</string>
@@ -185,7 +185,7 @@
     <string name="profile_import">Profili içe aktar</string>
     <string name="subscription_import_message">%s aboneliğini içe aktarmayı gerçekten istiyor musunuz\? Eğer güvenilir olmayan bir kaynaktan geliyorsanız bu IP adresinizin ve davranışınızın sızdırılmasına sebep olabilir.</string>
     <string name="subscription_import">Aboneliği içe aktar</string>
-    <string name="subscription_traffic">%s Kullanıldı / %s Kaldı</string>
+    <string name="subscription_traffic" formatted="false">%s Kullanıldı / %s Kaldı</string>
     <string name="subscription_used">%s Kullanıldı</string>
     <string name="group_filter">Filtre</string>
     <string name="subscription_update_message">%s güncelleniyor …</string>

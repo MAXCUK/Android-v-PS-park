@@ -34,9 +34,9 @@
     <string name="group_status_empty">Grupo vacío</string> 
     <string name="group_status_empty_subscription">Aún no actualizado</string> 
     <string name="group_status_proxies">%d proxys</string> 
-    <string name="group_status_proxies_subscription">%d proxys | Actualizado el %s</string> 
+    <string name="group_status_proxies_subscription" formatted="false">%d proxys | Actualizado el %s</string> 
     <string name="group_no_difference">%s: Sin diferencia</string> 
-    <string name="group_updated">%s: %d proxys actualizados</string> 
+    <string name="group_updated" formatted="false">%s: %d proxys actualizados</string> 
     <string name="group_show_diff">Diferencia</string> 
     <string name="group_diff">Diferencia (%s)</string> 
     <string name="group_delete_confirm_prompt">¿Seguro que quieres eliminar este grupo?</string> 
@@ -342,7 +342,7 @@
     <string name="subscription_update_message">Actualizando %s…</string> 
     <string name="group_filter">Filtrar</string>
     <string name="subscription_used">%s usado</string>
-    <string name="subscription_traffic">%s usados ​​/ %s restantes</string> 
+    <string name="subscription_traffic" formatted="false">%s usados ​​/ %s restantes</string> 
     <string name="subscription_import">Importar suscripción</string> 
     <string name="subscription_import_message">¿Confirma que desea importar la suscripción %s? Si proviene de una fuente que no es de confianza, hacer esto puede provocar que se filtre su IP y su comportamiento.</string> 
     <string name="profile_import">Importar perfil</string> 

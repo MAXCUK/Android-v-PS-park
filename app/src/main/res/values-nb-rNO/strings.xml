@@ -56,9 +56,9 @@
     <string name="alter_id">Alt-ID</string>
     <string name="group_diff">Forskjell (%s)</string>
     <string name="group_show_diff">Forskjell</string>
-    <string name="group_updated">%s: Oppdaterte %d mellomtjenere</string>
+    <string name="group_updated" formatted="false">%s: Oppdaterte %d mellomtjenere</string>
     <string name="group_no_difference">%s: Ingen forskjell</string>
-    <string name="group_status_proxies_subscription">%d mellomtjenere | Oppdatert %s</string>
+    <string name="group_status_proxies_subscription" formatted="false">%d mellomtjenere | Oppdatert %s</string>
     <string name="group_status_proxies">%d mellomtjenere</string>
     <string name="group_status_empty_subscription">Ikke oppdatert enda</string>
     <string name="group_status_empty">Tom gruppe</string>
@@ -112,7 +112,7 @@
     <string name="profile_import">Importer profil</string>
     <string name="subscription_import_message">Bekrefter du at du vil importere abonnement %s\? Hvis du kommer fra en kilde som du ikke har tillit til, kan dette føre til at din IP og denne oppførselen lekker.</string>
     <string name="subscription_import">Importer abonnement</string>
-    <string name="subscription_traffic">%s Brukt / %s Gjenstår</string>
+    <string name="subscription_traffic" formatted="false">%s Brukt / %s Gjenstår</string>
     <string name="subscription_used">%s Brukt</string>
     <string name="subscription_update_message">Oppdaterer %s…</string>
     <string name="subscription_update">Abonnementsoppdatering</string>
