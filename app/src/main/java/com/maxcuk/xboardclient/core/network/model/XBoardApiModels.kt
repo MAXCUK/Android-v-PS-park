@@ -4,7 +4,9 @@ import com.google.gson.annotations.SerializedName
 
 data class ApiResponse<T>(
     val data: T? = null,
-    val message: String? = null
+    val message: String? = null,
+    val status: String? = null,
+    val error: String? = null
 )
 
 data class LoginRequest(
@@ -38,6 +40,13 @@ data class UserInfoResponse(
     val expired_at: Long? = null,
     val plan_id: Long? = null,
     val uuid: String? = null
+)
+
+data class SubscriptionInfoResponse(
+    val token: String? = null,
+    val subscribe_url: String? = null,
+    val uuid: String? = null,
+    val email: String? = null
 )
 
 data class ServerRouteResponse(

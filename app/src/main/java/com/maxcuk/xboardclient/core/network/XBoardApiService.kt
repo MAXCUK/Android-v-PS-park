@@ -5,12 +5,15 @@ import com.maxcuk.xboardclient.core.network.model.AuthData
 import com.maxcuk.xboardclient.core.network.model.GuestConfigResponse
 import com.maxcuk.xboardclient.core.network.model.LoginRequest
 import com.maxcuk.xboardclient.core.network.model.ServerRouteResponse
+import com.maxcuk.xboardclient.core.network.model.SubscriptionInfoResponse
 import com.maxcuk.xboardclient.core.network.model.UserInfoResponse
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Url
 
 interface XBoardApiService {
     @GET("api/v1/guest/comm/config")
@@ -30,6 +33,11 @@ interface XBoardApiService {
     suspend fun fetchServers(
         @Header("Authorization") authorization: String
     ): Response<ApiResponse<List<ServerRouteResponse>>>
+
+    @GET("api/v1/user/getSubscribe")
+    suspend fun getSubscribe(
+        @Header("Authorization") authorization: String
+    ): Response<ApiResponse<SubscriptionInfoResponse>>
 
     @GET
     suspend fun fetchSubscriptionByUrl(

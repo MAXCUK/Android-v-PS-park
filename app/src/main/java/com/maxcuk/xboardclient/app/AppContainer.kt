@@ -7,6 +7,7 @@ import com.maxcuk.xboardclient.core.proxy.ProxyRuntimeManager
 import com.maxcuk.xboardclient.core.repository.AuthRepository
 import com.maxcuk.xboardclient.core.repository.NodeRepository
 import com.maxcuk.xboardclient.core.vpn.VpnController
+import com.maxcuk.xboardclient.core.work.RefreshScheduler
 
 class AppContainer(private val context: Context) {
     private val database = DatabaseFactory.create(context)
