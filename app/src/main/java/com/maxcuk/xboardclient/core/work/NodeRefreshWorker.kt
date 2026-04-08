@@ -3,8 +3,8 @@ package com.maxcuk.xboardclient.core.work
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.maxcuk.xboardclient.app.AppContainer
 import com.maxcuk.xboardclient.app.XBoardClientApplication
+import com.maxcuk.xboardclient.core.network.XBoardRemoteDataSource
 import com.maxcuk.xboardclient.core.network.NetworkFactory
 
 class NodeRefreshWorker(
@@ -15,8 +15,8 @@ class NodeRefreshWorker(
         return runCatching {
             val container = (applicationContext as XBoardClientApplication).container
             val session = container.authRepository.currentSession() ?: return Result.retry()
-            val api = NetworkFactory.create(session.baseUrl)
-            val servers = api.fetchServers(session.authToken).data
+            val remote = XBoardRemoteDataSource(NetworkFactory.create(session.baseUrl))
+            val servers = remote.fetchServers(session.authToken)
             container.nodeRepository.replaceNodes(servers)
             Result.success()
         }.getOrElse { Result.retry() }
