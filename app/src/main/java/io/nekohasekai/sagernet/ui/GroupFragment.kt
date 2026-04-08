@@ -47,8 +47,6 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
 
         ViewCompat.setOnApplyWindowInsetsListener(view, ListListener)
         toolbar.setTitle(R.string.menu_group)
-        toolbar.inflateMenu(R.menu.add_group_menu)
-        toolbar.setOnMenuItemClickListener(this)
 
         groupListView = view.findViewById(R.id.group_list)
         layoutManager = FixedLinearLayoutManager(groupListView)

@@ -153,8 +153,11 @@ class MainActivity : ThemedActivity(),
 
     fun refreshNavMenu(clashApi: Boolean) {
         if (::navigation.isInitialized) {
-            navigation.menu.findItem(R.id.nav_traffic)?.isVisible = clashApi
-            navigation.menu.findItem(R.id.nav_tuiguang)?.isVisible = !isPlay
+            navigation.menu.findItem(R.id.nav_configuration)?.isVisible = true
+            navigation.menu.findItem(R.id.nav_route)?.isVisible = true
+            navigation.menu.findItem(R.id.nav_settings)?.isVisible = true
+            navigation.menu.findItem(R.id.nav_xboard_sync)?.isVisible = true
+            navigation.menu.findItem(R.id.nav_about)?.isVisible = true
         }
     }
 
