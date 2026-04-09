@@ -46,5 +46,8 @@ data class XBoardSyncResult(
     val usedTraffic: Long,
     val totalTraffic: Long,
     val remainingTraffic: Long,
-    val expiredAt: Long
+    val expiredAt: Long,
+    val planName: String
+)
+: Long
 )

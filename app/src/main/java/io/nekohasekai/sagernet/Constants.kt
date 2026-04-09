@@ -159,6 +159,7 @@ object Key {
     const val XBOARD_TRAFFIC_USED = "xboardTrafficUsed"
     const val XBOARD_TRAFFIC_TOTAL = "xboardTrafficTotal"
     const val XBOARD_EXPIRE_AT = "xboardExpireAt"
+    const val XBOARD_PLAN_NAME = "xboardPlanName"
 }
 
 object TunImplementation {

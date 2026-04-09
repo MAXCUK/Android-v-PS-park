@@ -154,10 +154,21 @@ class MainActivity : ThemedActivity(),
         header.findViewById<TextView>(R.id.xboard_header_title)?.text = DataStore.xboardPanelName.ifBlank { "星隧互联" }
         header.findViewById<TextView>(R.id.xboard_header_email)?.text = DataStore.xboardEmail.ifBlank { getString(R.string.xboard_sync_never) }
 
-        val used = DataStore.xboardTrafficUsed
+        val groupTrafficUsed = DataStore.xboardLastGroupId.takeIf { it > 0L }?.let { groupId ->
+            runCatching {
+                SagerDatabase.proxyDao.getByGroup(groupId).sumOf { it.tx + it.rx }
+            }.getOrNull()
+        }
+        val used = groupTrafficUsed?.takeIf { it > 0L } ?: DataStore.xboardTrafficUsed
         val total = DataStore.xboardTrafficTotal
+        val remaining = (total - used).coerceAtLeast(0L)
+
+        header.findViewById<TextView>(R.id.xboard_header_plan)?.text = getString(
+            R.string.xboard_plan_status,
+            DataStore.xboardPlanName.ifBlank { "未识别套餐" }
+        )
+
         val trafficText = if (total > 0) {
-            val remaining = (total - used).coerceAtLeast(0)
             getString(
                 R.string.xboard_sync_traffic_status,
                 formatBinaryTraffic(total),
@@ -228,6 +239,7 @@ class MainActivity : ThemedActivity(),
                     DataStore.xboardTrafficUsed = 0L
                     DataStore.xboardTrafficTotal = 0L
                     DataStore.xboardExpireAt = 0L
+                    DataStore.xboardPlanName = ""
                     onMainDispatcher {
                         startActivity(Intent(this@MainActivity, XBoardSyncActivity::class.java))
                         finish()

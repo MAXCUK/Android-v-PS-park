@@ -21,10 +21,17 @@
         android:textAppearance="?attr/textAppearanceBody2" />
 
     <TextView
-        android:id="@+id/xboard_header_traffic"
+        android:id="@+id/xboard_header_plan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:textAppearance="?attr/textAppearanceBody2" />
+
+    <TextView
+        android:id="@+id/xboard_header_traffic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:textAppearance="?attr/textAppearanceBody2" />
 
     <TextView

@@ -35,6 +35,7 @@ class XBoardApiClient(
     fun getUserInfo(authHeader: String): XBoardUserInfo {
         val json = getJson("/api/v1/user/info", authHeader)
         val data = json.optJSONObject("data") ?: error(json.optString("message", "获取用户信息失败"))
+        val plan = data.optJSONObject("plan")
         return XBoardUserInfo(
             email = data.optString("email"),
             transfer_enable = data.optLong("transfer_enable", 0),
@@ -42,7 +43,9 @@ class XBoardApiClient(
             d = data.optLong("d", 0),
             expired_at = data.optLong("expired_at", 0),
             uuid = data.optString("uuid"),
-            plan_id = data.optLong("plan_id", 0)
+            plan_id = data.optLong("plan_id", 0),
+            plan_name = plan?.optString("name")?.takeIf { it.isNotBlank() }
+                ?: data.optString("plan_name").takeIf { it.isNotBlank() }
         )
     }
 

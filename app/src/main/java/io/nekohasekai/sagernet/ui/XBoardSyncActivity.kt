@@ -94,6 +94,7 @@ class XBoardSyncActivity : ThemedActivity() {
                 DataStore.xboardTrafficUsed = result.usedTraffic
                 DataStore.xboardTrafficTotal = result.totalTraffic
                 DataStore.xboardExpireAt = result.expiredAt
+                DataStore.xboardPlanName = result.planName
             }.onSuccess {
                 onMainDispatcher {
                     syncButton.isEnabled = true

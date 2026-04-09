@@ -171,6 +171,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var xboardTrafficUsed by configurationStore.long(Key.XBOARD_TRAFFIC_USED)
     var xboardTrafficTotal by configurationStore.long(Key.XBOARD_TRAFFIC_TOTAL)
     var xboardExpireAt by configurationStore.long(Key.XBOARD_EXPIRE_AT)
+    var xboardPlanName by configurationStore.string(Key.XBOARD_PLAN_NAME) { "" }
 
     // protocol
 
