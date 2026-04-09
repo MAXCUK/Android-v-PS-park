@@ -478,13 +478,3 @@ class MainActivity : ThemedActivity(),
         return fragment != null && fragment.onKeyDown(keyCode, event)
     }
 }
-nKeyDown(keyCode, event)
-    }
-}
-ragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment
-        return fragment != null && fragment.onKeyDown(keyCode, event)
-    }
-}
-nKeyDown(keyCode, event)
-    }
-}
