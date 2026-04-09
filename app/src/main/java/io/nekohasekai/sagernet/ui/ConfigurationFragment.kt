@@ -1463,18 +1463,13 @@ class ConfigurationFragment @JvmOverloads constructor(
                     (!showTraffic || proxyEntity.status <= 0) && address.isBlank()
 
                 if (proxyEntity.status <= 0) {
-                    if (showTraffic) {
-                        profileStatus.text = trafficText.text
-                        profileStatus.setTextColor(requireContext().getColorAttr(android.R.attr.textColorSecondary))
-                        trafficText.text = ""
-                    } else {
-                        profileStatus.text = ""
-                    }
+                    profileStatus.text = if (showTraffic) getString(R.string.unavailable) else ""
+                    profileStatus.setTextColor(requireContext().getColour(R.color.material_blue_grey_200))
                 } else if (proxyEntity.status == 1) {
                     profileStatus.text = getString(R.string.available, proxyEntity.ping)
-                    profileStatus.setTextColor(requireContext().getColour(R.color.material_green_500))
+                    profileStatus.setTextColor(requireContext().getColour(R.color.material_light_blue_50))
                 } else {
-                    profileStatus.setTextColor(requireContext().getColour(R.color.material_red_500))
+                    profileStatus.setTextColor(requireContext().getColour(R.color.material_red_200))
                     if (proxyEntity.status == 2) {
                         profileStatus.text = proxyEntity.error
                     }
