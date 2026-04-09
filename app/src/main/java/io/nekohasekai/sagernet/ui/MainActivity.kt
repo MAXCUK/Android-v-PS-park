@@ -435,18 +435,3 @@ class MainActivity : ThemedActivity(),
         return fragment != null && fragment.onKeyDown(keyCode, event)
     }
 }
-gation.requestFocus()
-            }
-            KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (binding.drawerLayout.isOpen) {
-                    binding.drawerLayout.close()
-                    return true
-                }
-            }
-        }
-        if (super.onKeyDown(keyCode, event)) return true
-        if (binding.drawerLayout.isOpen) return false
-        val fragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment
-        return fragment != null && fragment.onKeyDown(keyCode, event)
-    }
-}

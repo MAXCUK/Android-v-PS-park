@@ -42,7 +42,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                         )
                         .addItem(
                             MaterialAboutActionItem.Builder()
-                                .text(getString(R.string.version_x, "sing-box"))
+                                .text(activityContext.getString(R.string.version_x, "sing-box"))
                                 .subText(Libcore.versionBox())
                                 .setOnClickAction {}
                                 .build()
