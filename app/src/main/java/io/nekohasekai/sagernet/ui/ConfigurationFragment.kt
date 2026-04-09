@@ -719,7 +719,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                 }
                 GroupManager.postReload(DataStore.currentGroupId())
                 onMainDispatcher {
-                    groupPagerAdapter.groupFragments[DataStore.currentGroupId()]?.reloadProfiles()
+                    adapter?.reloadProfiles()
                 }
                 DataStore.runningTest = false
             }
@@ -791,7 +791,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                 }
                 GroupManager.postReload(DataStore.currentGroupId())
                 onMainDispatcher {
-                    groupPagerAdapter.groupFragments[DataStore.currentGroupId()]?.reloadProfiles()
+                    adapter?.reloadProfiles()
                 }
                 DataStore.runningTest = false
             }
