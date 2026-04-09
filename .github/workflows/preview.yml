@@ -28,25 +28,37 @@ jobs:
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;25.0.8775105"
 
       - name: Prepare local.properties
+        shell: bash
         run: |
-          echo "sdk.dir=${ANDROID_SDK_ROOT}" > local.properties
-          echo "ndk.dir=${ANDROID_SDK_ROOT}/ndk/25.0.8775105" >> local.properties
+          SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          echo "SDK_ROOT=$SDK_ROOT"
+          ls -la "$SDK_ROOT" || true
+          find "$SDK_ROOT/ndk" -maxdepth 2 -name source.properties 2>/dev/null || true
+          echo "sdk.dir=${SDK_ROOT}" > local.properties
+          echo "ndk.dir=${SDK_ROOT}/ndk/25.0.8775105" >> local.properties
+          cat local.properties
 
       - name: Init libcore toolchain
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.0.8775105
-          NDK: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.0.8775105
-        run: ./run lib core init
+        shell: bash
+        run: |
+          SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          export ANDROID_HOME="${SDK_ROOT}"
+          export ANDROID_SDK_ROOT="${SDK_ROOT}"
+          export ANDROID_NDK_HOME="${SDK_ROOT}/ndk/25.0.8775105"
+          export NDK="${SDK_ROOT}/ndk/25.0.8775105"
+          ./run lib core init
 
       - name: Build libcore
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.0.8775105
-          NDK: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.0.8775105
-        run: ./run lib core
+        shell: bash
+        run: |
+          SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          export ANDROID_HOME="${SDK_ROOT}"
+          export ANDROID_SDK_ROOT="${SDK_ROOT}"
+          export ANDROID_NDK_HOME="${SDK_ROOT}/ndk/25.0.8775105"
+          export NDK="${SDK_ROOT}/ndk/25.0.8775105"
+          ./run lib core
 
       - name: Verify libcore artifact
         run: |
