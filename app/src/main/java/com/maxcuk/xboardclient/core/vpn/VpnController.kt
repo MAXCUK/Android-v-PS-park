@@ -2,6 +2,7 @@ package com.maxcuk.xboardclient.core.vpn
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import com.maxcuk.xboardclient.core.datastore.ConnectionPrefs
 import com.maxcuk.xboardclient.core.proxy.ProxyRuntimeManager
 import com.maxcuk.xboardclient.core.proxy.model.RuntimeStatus
@@ -23,11 +24,17 @@ class VpnController(
         return runCatching {
             _state.value = VpnConnectionState.PREPARING
             val node = nodeRepository.currentSelectedNode() ?: error("请先选择节点")
-            proxyRuntimeManager.prepare(node)
-            check(proxyRuntimeManager.startPlaceholder()) { proxyRuntimeManager.runtimeStatus().message }
-            context.startService(Intent(context, XBoardVpnService::class.java).apply {
+            val configFile = proxyRuntimeManager.prepare(node)
+            check(proxyRuntimeManager.runtimeInstalled()) { proxyRuntimeManager.runtimeStatus().message }
+            val intent = Intent(context, XBoardVpnService::class.java).apply {
                 action = XBoardVpnService.ACTION_CONNECT
-            })
+                putExtra(XBoardVpnService.EXTRA_CONFIG_PATH, configFile.absolutePath)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
             connectionPrefs.setLastConnected(true)
             _state.value = VpnConnectionState.CONNECTED
         }.onFailure {
@@ -57,7 +64,7 @@ class VpnController(
         context.startService(Intent(context, XBoardVpnService::class.java).apply {
             action = XBoardVpnService.ACTION_DISCONNECT
         })
-        proxyRuntimeManager.stopPlaceholder()
+        proxyRuntimeManager.stop()
         _state.value = VpnConnectionState.STOPPED
     }
 }

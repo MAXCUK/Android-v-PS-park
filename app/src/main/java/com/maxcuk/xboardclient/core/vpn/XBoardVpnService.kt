@@ -9,18 +9,43 @@ import android.net.VpnService
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.maxcuk.xboardclient.MainActivity
+import com.maxcuk.xboardclient.core.proxy.ProxyRuntimeManager
 
 class XBoardVpnService : VpnService() {
 
+    private val runtimeManager: ProxyRuntimeManager by lazy {
+        ProxyRuntimeManager(applicationContext)
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_CONNECT -> startForeground(NOTIFICATION_ID, buildNotification("正在连接代理"))
-            ACTION_DISCONNECT -> stopSelf()
+            ACTION_CONNECT -> {
+                startForeground(NOTIFICATION_ID, buildNotification("正在连接代理"))
+                val configPath = intent.getStringExtra(EXTRA_CONFIG_PATH)
+                val started = runtimeManager.start(
+                    configPath?.let { java.io.File(it) } ?: runtimeManager.runtimeStatus().configPath.let { java.io.File(it) }
+                )
+                if (!started) {
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
+            }
+            ACTION_DISCONNECT -> {
+                runtimeManager.stop()
+                stopSelf()
+            }
         }
         return START_STICKY
     }
 
+    override fun onRevoke() {
+        runtimeManager.stop()
+        super.onRevoke()
+    }
+
     override fun onDestroy() {
+        runtimeManager.stop()
         stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }
@@ -56,6 +81,7 @@ class XBoardVpnService : VpnService() {
     companion object {
         const val ACTION_CONNECT = "com.maxcuk.xboardclient.action.CONNECT"
         const val ACTION_DISCONNECT = "com.maxcuk.xboardclient.action.DISCONNECT"
+        const val EXTRA_CONFIG_PATH = "com.maxcuk.xboardclient.extra.CONFIG_PATH"
         private const val CHANNEL_ID = "xboard_vpn"
         private const val NOTIFICATION_ID = 1001
     }
