@@ -23,8 +23,17 @@ data class XBoardSubscriptionInfo(
     val token: String? = null,
     val subscribe_url: String? = null,
     val email: String? = null,
-    val uuid: String? = null
-)
+    val uuid: String? = null,
+    val transfer_enable: Long = 0,
+    val u: Long = 0,
+    val d: Long = 0,
+    val expired_at: Long = 0,
+    val plan_id: Long = 0,
+    val plan_name: String? = null
+) {
+    val usedTraffic: Long get() = u + d
+    val remainingTraffic: Long get() = (transfer_enable - usedTraffic).coerceAtLeast(0)
+}
 
 data class XBoardUserInfo(
     val email: String? = null,

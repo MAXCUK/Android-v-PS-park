@@ -24,11 +24,18 @@ class XBoardApiClient(
     fun getSubscribe(authHeader: String): XBoardSubscriptionInfo {
         val json = getJson("/api/v1/user/getSubscribe", authHeader)
         val data = json.optJSONObject("data") ?: error(json.optString("message", "获取订阅失败"))
+        val plan = data.optJSONObject("plan")
         return XBoardSubscriptionInfo(
             token = data.optString("token"),
             subscribe_url = data.optString("subscribe_url"),
             email = data.optString("email"),
-            uuid = data.optString("uuid")
+            uuid = data.optString("uuid"),
+            transfer_enable = data.optLong("transfer_enable", 0),
+            u = data.optLong("u", 0),
+            d = data.optLong("d", 0),
+            expired_at = data.optLong("expired_at", 0),
+            plan_id = data.optLong("plan_id", 0),
+            plan_name = plan?.optString("name")?.takeIf { it.isNotBlank() }
         )
     }
 

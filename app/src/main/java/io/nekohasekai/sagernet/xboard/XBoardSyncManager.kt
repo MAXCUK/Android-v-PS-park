@@ -28,17 +28,25 @@ object XBoardSyncManager {
         val finalPanelName = panelName.ifBlank { DEFAULT_GROUP_NAME }
         val group = findOrCreateGroup(finalPanelName, subscribeUrl)
         GroupUpdater.startUpdate(group, true)
-        val planName = userInfo.plan_name?.takeIf { it.isNotBlank() }
+
+        val totalTraffic = subscription.transfer_enable.takeIf { it > 0 } ?: userInfo.transfer_enable
+        val usedTraffic = subscription.usedTraffic.takeIf { it > 0 } ?: userInfo.usedTraffic
+        val remainingTraffic = (totalTraffic - usedTraffic).coerceAtLeast(0)
+        val expiredAt = subscription.expired_at.takeIf { it > 0 } ?: userInfo.expired_at
+        val planName = subscription.plan_name?.takeIf { it.isNotBlank() }
+            ?: userInfo.plan_name?.takeIf { it.isNotBlank() }
+            ?: subscription.plan_id.takeIf { it > 0 }?.let { "套餐 #$it" }
             ?: userInfo.plan_id.takeIf { it > 0 }?.let { "套餐 #$it" }
             ?: "未识别套餐"
+
         return XBoardSyncResult(
             groupId = group.id,
             panelName = finalPanelName,
-            email = userInfo.email ?: email,
-            usedTraffic = userInfo.usedTraffic,
-            totalTraffic = userInfo.transfer_enable,
-            remainingTraffic = userInfo.remainingTraffic,
-            expiredAt = userInfo.expired_at,
+            email = subscription.email ?: userInfo.email ?: email,
+            usedTraffic = usedTraffic,
+            totalTraffic = totalTraffic,
+            remainingTraffic = remainingTraffic,
+            expiredAt = expiredAt,
             planName = planName
         )
     }
