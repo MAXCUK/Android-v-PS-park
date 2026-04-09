@@ -718,9 +718,6 @@ class ConfigurationFragment @JvmOverloads constructor(
                     }
                 }
                 GroupManager.postReload(DataStore.currentGroupId())
-                onMainDispatcher {
-                    adapter?.reloadProfiles()
-                }
                 DataStore.runningTest = false
             }
         }
@@ -790,9 +787,6 @@ class ConfigurationFragment @JvmOverloads constructor(
                     }
                 }
                 GroupManager.postReload(DataStore.currentGroupId())
-                onMainDispatcher {
-                    adapter?.reloadProfiles()
-                }
                 DataStore.runningTest = false
             }
         }
