@@ -32,7 +32,20 @@ jobs:
           echo "sdk.dir=${ANDROID_SDK_ROOT}" > local.properties
           echo "ndk.dir=${ANDROID_SDK_ROOT}/ndk/25.0.8775105" >> local.properties
 
+      - name: Init libcore toolchain
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.0.8775105
+          NDK: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.0.8775105
+        run: ./run lib core init
+
       - name: Build libcore
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.0.8775105
+          NDK: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.0.8775105
         run: ./run lib core
 
       - name: Verify libcore artifact
