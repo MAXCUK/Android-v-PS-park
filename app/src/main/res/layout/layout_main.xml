@@ -9,27 +9,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/bg_liquid_base">
-
-        <ImageView
-            android:id="@+id/liquid_blob_top"
-            android:layout_width="360dp"
-            android:layout_height="360dp"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="-80dp"
-            android:layout_marginEnd="-70dp"
-            android:alpha="0.9"
-            android:src="@drawable/bg_liquid_layer_1" />
-
-        <ImageView
-            android:id="@+id/liquid_blob_bottom"
-            android:layout_width="320dp"
-            android:layout_height="320dp"
-            android:layout_gravity="bottom|start"
-            android:layout_marginStart="-70dp"
-            android:layout_marginBottom="120dp"
-            android:alpha="0.85"
-            android:src="@drawable/bg_liquid_layer_2" />
+        android:background="@drawable/bg_liquid_scene">
 
         <LinearLayout
             android:layout_width="match_parent"

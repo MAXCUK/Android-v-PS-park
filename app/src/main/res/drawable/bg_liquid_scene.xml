@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/bg_liquid_base" />
+    <item android:gravity="top|end" android:top="-80dp" android:right="-70dp">
+        <shape android:shape="oval">
+            <size android:width="360dp" android:height="360dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="240dp"
+                android:centerColor="#5A68D5FF"
+                android:endColor="#0068D5FF" />
+        </shape>
+    </item>
+    <item android:gravity="bottom|start" android:left="-70dp" android:bottom="120dp">
+        <shape android:shape="oval">
+            <size android:width="300dp" android:height="300dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="220dp"
+                android:centerColor="#444F46E5"
+                android:endColor="#004F46E5" />
+        </shape>
+    </item>
+</layer-list>
