@@ -315,25 +315,13 @@ class MainActivity : ThemedActivity(),
     fun displayFragmentWithId(@IdRes id: Int): Boolean {
         when (id) {
             R.id.nav_configuration -> displayFragment(ConfigurationFragment())
-            R.id.nav_group -> displayFragment(GroupFragment())
             R.id.nav_route -> displayFragment(RouteFragment())
             R.id.nav_settings -> displayFragment(SettingsFragment())
             R.id.nav_xboard_sync -> {
                 startActivity(Intent(this, XBoardSyncActivity::class.java))
                 return false
             }
-            R.id.nav_traffic -> displayFragment(WebviewFragment())
-            R.id.nav_tools -> displayFragment(ToolsFragment())
-            R.id.nav_logcat -> displayFragment(LogcatFragment())
-            R.id.nav_faq -> {
-                launchCustomTab("https://matsuridayo.github.io/")
-                return false
-            }
             R.id.nav_about -> displayFragment(AboutFragment())
-            R.id.nav_tuiguang -> {
-                launchCustomTab("https://neko-box.pages.dev/喵")
-                return false
-            }
             else -> return false
         }
         navigation.menu.findItem(id).isChecked = true
@@ -433,6 +421,21 @@ class MainActivity : ThemedActivity(),
                 if (super.onKeyDown(keyCode, event)) return true
                 binding.drawerLayout.open()
                 navigation.requestFocus()
+            }
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                if (binding.drawerLayout.isOpen) {
+                    binding.drawerLayout.close()
+                    return true
+                }
+            }
+        }
+        if (super.onKeyDown(keyCode, event)) return true
+        if (binding.drawerLayout.isOpen) return false
+        val fragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment
+        return fragment != null && fragment.onKeyDown(keyCode, event)
+    }
+}
+gation.requestFocus()
             }
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (binding.drawerLayout.isOpen) {
