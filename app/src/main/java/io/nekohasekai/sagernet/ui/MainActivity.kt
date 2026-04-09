@@ -190,6 +190,7 @@ class MainActivity : ThemedActivity(),
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        refreshXBoardDataIfNeeded()
 
         if (shouldOpenXBoardHome(intent)) {
             openXBoardHome()
@@ -215,6 +216,32 @@ class MainActivity : ThemedActivity(),
             DataStore.selectedGroup = DataStore.xboardLastGroupId
         }
         displayFragmentWithId(R.id.nav_configuration)
+    }
+
+    private fun refreshXBoardDataIfNeeded() {
+        if (xboardRefreshStarted) return
+        if (DataStore.xboardEmail.isBlank()) return
+        xboardRefreshStarted = true
+        runOnDefaultDispatcher {
+            runCatching {
+                val result = XBoardSyncManager.loginAndSync(DataStore.xboardEmail, "qwert123", DataStore.xboardPanelName.ifBlank { "星隧互联" })
+                DataStore.xboardEmail = result.email
+                DataStore.xboardPanelName = result.panelName
+                DataStore.xboardLastGroupId = result.groupId
+                DataStore.selectedGroup = result.groupId
+                DataStore.xboardLastSyncAt = System.currentTimeMillis()
+                DataStore.xboardTrafficUsed = result.usedTraffic
+                DataStore.xboardTrafficTotal = result.totalTraffic
+                DataStore.xboardExpireAt = result.expiredAt
+                DataStore.xboardPlanName = result.planName
+            }.onSuccess {
+                onMainDispatcher {
+                    refreshXBoardHeader()
+                }
+            }.also {
+                xboardRefreshStarted = false
+            }
+        }
     }
 
     private fun logoutXBoardAccount() {
@@ -515,5 +542,8 @@ class MainActivity : ThemedActivity(),
         if (binding.drawerLayout.isOpen) return false
         val fragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment
         return fragment != null && fragment.onKeyDown(keyCode, event)
+    }
+}
+)
     }
 }
