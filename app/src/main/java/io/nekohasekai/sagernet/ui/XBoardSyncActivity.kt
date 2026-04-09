@@ -43,7 +43,7 @@ class XBoardSyncActivity : ThemedActivity() {
             val email = emailInput.text?.toString().orEmpty().trim()
             val password = passwordInput.text?.toString().orEmpty().trim()
             if (email.isBlank() || password.isBlank()) {
-                alert(getString(R.string.xboard_sync_login_required)).show()
+                alert("请先输入邮箱和密码").show()
                 return@setOnClickListener
             }
             doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, statusView, trafficView, expiryView)

@@ -36,6 +36,7 @@
     <string name="xboard_sync_traffic_status">流量：已用 %1$s / 总量 %2$s / 剩余 %3$s</string>
     <string name="xboard_sync_expiry_status">到期时间：%1$s</string>
     <string name="xboard_sync_refresh_status">刷新状态</string>
+    <string name="xboard_sync_login_required">请先输入邮箱和密码</string>
     <!-- externel -->
     <string name="action_copy">Copy</string>
     <string name="action_open">Open</string>
@@ -374,7 +375,7 @@
     <string name="subscription_user_agent">UserAgent</string>
     <string name="confirm">Confirm</string>
     <string name="missing_plugin">Missing Plugin</string>
-    <string name="profile_requiring_plugin">Profile %s requires the %s plugin to be installed, but
+    <string name="profile_requiring_plugin" formatted="false">Profile %s requires the %s plugin to be installed, but
         it was not found.</string>
     <string name="action_learn_more">LEARN MORE</string>
     <string name="action_download">DOWNLOAD</string>
@@ -418,7 +419,7 @@
     <string name="group_order_origin">Origin</string>
     <string name="group_order_by_name">By Name</string>
     <string name="group_order_by_delay">By Delay</string>
-    <string name="plugin_exists_but_on_shit_system">Profile %s requires the %s plugin, but your
+    <string name="plugin_exists_but_on_shit_system" formatted="false">Profile %s requires the %s plugin, but your
         proprietary equipment vendor (usually surveillance capital giants and malware maker)
         tampered with your Android, making the plugin unusable.</string>
 
@@ -520,9 +521,9 @@
     <string name="tuic_disable_sni">Disable SNI</string>
     <string name="tuic_reduce_rtt">Enable 0-RTT QUIC handshake</string>
 
-    <string name="please_update">Your APP is too old (%s). And will stop working at %s. Please
+    <string name="please_update" formatted="false">Your APP is too old (%s). And will stop working at %s. Please
         update!</string>
-    <string name="please_update_force">Your APP is too old (%s). And has been stopped working at %s.
+    <string name="please_update_force" formatted="false">Your APP is too old (%s). And has been stopped working at %s.
         Please update!</string>
     <string name="connection_test_delete_unavailable">Clear unavailable</string>
     <string name="move">Move</string>
