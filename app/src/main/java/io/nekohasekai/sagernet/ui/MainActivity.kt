@@ -157,13 +157,15 @@ class MainActivity : ThemedActivity(),
         var groupTrafficUsed = 0L
         val groupId = DataStore.xboardLastGroupId
         if (groupId > 0L) {
-            runCatching {
-                val profiles = SagerDatabase.proxyDao.getByGroup(groupId)
-                var totalUsed = 0L
-                for (profile in profiles) {
-                    totalUsed += profile.tx + profile.rx
+            try {
+                val profiles: List<ProxyEntity> = SagerDatabase.proxyDao.getByGroup(groupId)
+                var index = 0
+                while (index < profiles.size) {
+                    val profile = profiles[index]
+                    groupTrafficUsed += profile.tx + profile.rx
+                    index++
                 }
-                groupTrafficUsed = totalUsed
+            } catch (_: Exception) {
             }
         }
         val used = if (groupTrafficUsed > 0L) groupTrafficUsed else DataStore.xboardTrafficUsed
@@ -527,5 +529,8 @@ class MainActivity : ThemedActivity(),
         if (binding.drawerLayout.isOpen) return false
         val fragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment
         return fragment != null && fragment.onKeyDown(keyCode, event)
+    }
+}
+de, event)
     }
 }
