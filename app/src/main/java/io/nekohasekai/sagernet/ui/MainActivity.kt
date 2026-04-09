@@ -79,7 +79,10 @@ class MainActivity : ThemedActivity(),
         refreshXBoardHeader()
 
         if (savedInstanceState == null) {
-            displayFragmentWithId(R.id.nav_configuration)
+            startActivity(Intent(this, XBoardSyncActivity::class.java))
+            if (DataStore.xboardLastGroupId > 0L && DataStore.xboardEmail.isNotBlank()) {
+                displayFragmentWithId(R.id.nav_configuration)
+            }
         }
         onBackPressedDispatcher.addCallback {
             if (supportFragmentManager.findFragmentById(R.id.fragment_holder) is ConfigurationFragment) {
