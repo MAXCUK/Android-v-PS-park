@@ -62,6 +62,8 @@ class MainActivity : ThemedActivity(),
         const val EXTRA_OPEN_XBOARD_HOME = "open_xboard_home"
     }
 
+    private var xboardRefreshStarted = false
+
     lateinit var binding: LayoutMainBinding
     lateinit var navigation: NavigationView
 
@@ -542,5 +544,8 @@ class MainActivity : ThemedActivity(),
         if (binding.drawerLayout.isOpen) return false
         val fragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment
         return fragment != null && fragment.onKeyDown(keyCode, event)
+    }
+}
+)
     }
 }
