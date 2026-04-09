@@ -50,6 +50,7 @@ import io.nekohasekai.sagernet.ktx.parseProxies
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import moe.matsuri.nb4a.utils.Util
+import io.nekohasekai.sagernet.xboard.XBoardSyncManager
 import java.text.DateFormat
 import java.util.Date
 
