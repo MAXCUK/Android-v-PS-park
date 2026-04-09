@@ -145,8 +145,3 @@ class XBoardSyncActivity : ThemedActivity() {
         }
     }
 }
-else {
-            expiryView.visibility = View.GONE
-        }
-    }
-}
