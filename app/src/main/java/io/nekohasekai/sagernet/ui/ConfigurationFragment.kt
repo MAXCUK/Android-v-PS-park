@@ -1463,15 +1463,17 @@ class ConfigurationFragment @JvmOverloads constructor(
                     (!showTraffic || proxyEntity.status <= 0) && address.isBlank()
 
                 if (proxyEntity.status <= 0) {
-                    profileStatus.text = if (showTraffic) getString(R.string.unavailable) else ""
+                    profileStatus.text = getString(R.string.unavailable)
                     profileStatus.setTextColor(requireContext().getColour(R.color.material_blue_grey_200))
                 } else if (proxyEntity.status == 1) {
-                    profileStatus.text = getString(R.string.available, proxyEntity.ping)
+                    profileStatus.text = "${proxyEntity.ping} ms"
                     profileStatus.setTextColor(requireContext().getColour(R.color.material_light_blue_50))
                 } else {
                     profileStatus.setTextColor(requireContext().getColour(R.color.material_red_200))
-                    if (proxyEntity.status == 2) {
-                        profileStatus.text = proxyEntity.error
+                    profileStatus.text = if (proxyEntity.status == 2) {
+                        proxyEntity.error ?: getString(R.string.unavailable)
+                    } else {
+                        getString(R.string.unavailable)
                     }
                 }
 
