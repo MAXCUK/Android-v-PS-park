@@ -185,8 +185,11 @@ object Util {
     }
 
     fun getStringBox(b: StringBox?): String {
-        if (b != null && b.value != null) {
-            return b.value
+        if (b != null) {
+            val value = b.getValue()
+            if (value != null) {
+                return value
+            }
         }
         return ""
     }
