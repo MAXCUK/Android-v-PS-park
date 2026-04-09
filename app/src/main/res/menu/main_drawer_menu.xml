@@ -23,6 +23,11 @@
             android:title="@string/menu_xboard_sync" />
 
         <item
+            android:id="@+id/nav_xboard_logout"
+            android:icon="@drawable/ic_action_delete"
+            android:title="@string/xboard_logout" />
+
+        <item
             android:id="@+id/nav_about"
             android:icon="@drawable/ic_baseline_info_24"
             android:title="@string/menu_about" />

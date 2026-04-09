@@ -211,6 +211,33 @@ class MainActivity : ThemedActivity(),
         displayFragmentWithId(R.id.nav_configuration)
     }
 
+    private fun logoutXBoardAccount() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.xboard_logout)
+            .setMessage(R.string.xboard_logout_confirm)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                runOnDefaultDispatcher {
+                    val groupId = DataStore.xboardLastGroupId
+                    if (groupId > 0L) {
+                        runCatching { GroupManager.deleteGroup(groupId) }
+                    }
+                    DataStore.xboardEmail = ""
+                    DataStore.xboardPanelName = "星隧互联"
+                    DataStore.xboardLastGroupId = 0L
+                    DataStore.xboardLastSyncAt = 0L
+                    DataStore.xboardTrafficUsed = 0L
+                    DataStore.xboardTrafficTotal = 0L
+                    DataStore.xboardExpireAt = 0L
+                    onMainDispatcher {
+                        startActivity(Intent(this@MainActivity, XBoardSyncActivity::class.java))
+                        finish()
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
     fun urlTest(): Int {
         if (!DataStore.serviceState.connected || connection.service == null) error("not started")
         return connection.service!!.urlTest()

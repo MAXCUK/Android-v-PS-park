@@ -25,17 +25,6 @@
                 android:textAppearance="?attr/textAppearanceHeadline4"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/xboard_home"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:paddingStart="12dp"
-                android:paddingEnd="4dp"
-                android:text="@string/xboard_sync_home"
-                android:textAppearance="?attr/textAppearanceBody1"
-                android:textStyle="bold" />
         </LinearLayout>
 
         <TextView

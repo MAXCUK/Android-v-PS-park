@@ -30,7 +30,6 @@ class XBoardSyncActivity : ThemedActivity() {
         val syncButton = findViewById<Button>(R.id.xboard_sync_button)
         val refreshButton = findViewById<Button>(R.id.xboard_refresh_button)
         val openGroupButton = findViewById<Button>(R.id.xboard_open_group_button)
-        val homeView = findViewById<TextView>(R.id.xboard_home)
         val statusView = findViewById<TextView>(R.id.xboard_status)
         val trafficView = findViewById<TextView>(R.id.xboard_traffic)
         val expiryView = findViewById<TextView>(R.id.xboard_expiry)
@@ -41,14 +40,6 @@ class XBoardSyncActivity : ThemedActivity() {
 
         val hasLoginState = DataStore.xboardLastGroupId > 0 && DataStore.xboardEmail.isNotBlank()
         openGroupButton.visibility = if (hasLoginState) View.VISIBLE else View.GONE
-        homeView.visibility = if (hasLoginState) View.GONE else View.VISIBLE
-
-        homeView.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java).apply {
-                putExtra(MainActivity.EXTRA_OPEN_XBOARD_HOME, true)
-            })
-            finish()
-        }
 
         syncButton.setOnClickListener {
             val email = emailInput.text?.toString().orEmpty().trim()
@@ -57,7 +48,7 @@ class XBoardSyncActivity : ThemedActivity() {
                 alert(getString(R.string.xboard_sync_login_required)).show()
                 return@setOnClickListener
             }
-            doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, homeView, statusView, trafficView, expiryView)
+            doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, statusView, trafficView, expiryView)
         }
 
         refreshButton.setOnClickListener {
@@ -67,7 +58,7 @@ class XBoardSyncActivity : ThemedActivity() {
                 renderStatus(statusView, trafficView, expiryView)
                 return@setOnClickListener
             }
-            doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, homeView, statusView, trafficView, expiryView)
+            doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, statusView, trafficView, expiryView)
         }
 
         openGroupButton.setOnClickListener {
@@ -85,7 +76,6 @@ class XBoardSyncActivity : ThemedActivity() {
         syncButton: Button,
         refreshButton: Button,
         openGroupButton: Button,
-        homeView: TextView,
         statusView: TextView,
         trafficView: TextView,
         expiryView: TextView
@@ -109,7 +99,6 @@ class XBoardSyncActivity : ThemedActivity() {
                     syncButton.isEnabled = true
                     refreshButton.isEnabled = true
                     openGroupButton.visibility = View.VISIBLE
-                    homeView.visibility = View.GONE
                     renderStatus(statusView, trafficView, expiryView)
                     startActivity(Intent(this@XBoardSyncActivity, MainActivity::class.java).apply {
                         putExtra(MainActivity.EXTRA_OPEN_XBOARD_HOME, true)

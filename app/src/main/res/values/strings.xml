@@ -34,10 +34,11 @@
     <string name="xboard_sync_last_status">上次同步：%1$s</string>
     <string name="xboard_sync_open_group">进入应用</string>
     <string name="xboard_sync_traffic_status">流量：总量 %1$s / 已用 %2$s / 剩余 %3$s</string>
-    <string name="xboard_sync_home">主页</string>
     <string name="xboard_sync_expiry_status">到期时间：%1$s</string>
     <string name="xboard_sync_refresh_status">刷新状态</string>
     <string name="xboard_sync_login_required">请先输入邮箱和密码</string>
+    <string name="xboard_logout">退出当前账号</string>
+    <string name="xboard_logout_confirm">退出后将清空当前账号同步的订阅与登录状态，是否继续？</string>
     <!-- externel -->
     <string name="action_copy">Copy</string>
     <string name="action_open">Open</string>
