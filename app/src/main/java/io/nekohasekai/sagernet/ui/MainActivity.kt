@@ -79,9 +79,10 @@ class MainActivity : ThemedActivity(),
         refreshXBoardHeader()
 
         if (savedInstanceState == null) {
-            startActivity(Intent(this, XBoardSyncActivity::class.java))
             if (DataStore.xboardLastGroupId > 0L && DataStore.xboardEmail.isNotBlank()) {
                 displayFragmentWithId(R.id.nav_configuration)
+            } else {
+                startActivity(Intent(this, XBoardSyncActivity::class.java))
             }
         }
         onBackPressedDispatcher.addCallback {
@@ -137,8 +138,8 @@ class MainActivity : ThemedActivity(),
             val remaining = (total - used).coerceAtLeast(0)
             getString(
                 R.string.xboard_sync_traffic_status,
-                android.text.format.Formatter.formatFileSize(this, used),
                 android.text.format.Formatter.formatFileSize(this, total),
+                android.text.format.Formatter.formatFileSize(this, used),
                 android.text.format.Formatter.formatFileSize(this, remaining)
             )
         } else {
