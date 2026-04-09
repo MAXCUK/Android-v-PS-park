@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@drawable/bg_drawer_selected" android:state_checked="true" />
-    <item android:color="@android:color/transparent" android:state_checked="false" />
+    <item android:color="#EAF1FF" android:state_checked="true" />
+    <item android:color="#C8D4E6" android:state_enabled="true" />
+    <item android:color="#70819A" android:state_enabled="false" />
 </selector>
