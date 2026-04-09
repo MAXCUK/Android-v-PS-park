@@ -1,0 +1,52 @@
+name: Preview Build
+on:
+  push:
+    branches:
+      - nekobox-xboard-actions
+  workflow_dispatch:
+    inputs:
+jobs:
+  preview:
+    name: Build Preview APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Golang
+        uses: actions/setup-go@v5
+        with:
+          go-version: ^1.25
+          cache-dependency-path: libcore/go.sum
+
+      - name: Build libcore
+        run: ./run lib core
+
+      - name: Verify libcore artifact
+        run: |
+          test -f app/libs/libcore.aar
+          ls -lh app/libs/libcore.aar
+
+      - name: Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle
+          key: gradle-preview-${{ hashFiles('**/*.gradle.kts') }}
+
+      - name: Gradle Build
+        env:
+          BUILD_PLUGIN: none
+        run: |
+          echo "sdk.dir=${ANDROID_HOME}" > local.properties
+          echo "ndk.dir=${ANDROID_HOME}/ndk/25.0.8775105" >> local.properties
+          export LOCAL_PROPERTIES="${{ secrets.LOCAL_PROPERTIES }}"
+          ./run init action gradle
+          ./gradlew app:assemblePreviewRelease
+          APK=$(find app/build/outputs/apk -name '*arm64-v8a*.apk')
+          APK=$(dirname "$APK")
+          echo "APK=$APK" >> $GITHUB_ENV
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: APKs
+          path: ${{ env.APK }}
