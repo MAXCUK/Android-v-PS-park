@@ -8,12 +8,6 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_xboard_sync"
-        android:icon="@drawable/ic_file_cloud_queue"
-        android:title="@string/menu_xboard_sync"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/action_misc"
         android:icon="@drawable/ic_baseline_more_vert_24"
         android:title=""

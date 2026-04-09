@@ -345,10 +345,6 @@ class ConfigurationFragment @JvmOverloads constructor(
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_xboard_sync -> {
-                startActivity(Intent(requireActivity(), XBoardSyncActivity::class.java))
-            }
-
             R.id.action_update_subscription -> {
                 val group = DataStore.currentGroup()
                 if (group.type != GroupType.SUBSCRIPTION) {

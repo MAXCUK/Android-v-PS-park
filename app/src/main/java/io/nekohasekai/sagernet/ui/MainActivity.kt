@@ -360,6 +360,11 @@ class MainActivity : ThemedActivity(),
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.nav_xboard_logout) {
+            logoutXBoardAccount()
+            binding.drawerLayout.closeDrawers()
+            return true
+        }
         return if (item.isChecked) {
             binding.drawerLayout.closeDrawers()
             true
