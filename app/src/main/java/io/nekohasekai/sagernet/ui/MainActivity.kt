@@ -199,7 +199,7 @@ class MainActivity : ThemedActivity(),
         group.name = group.name.takeIf { !it.isNullOrBlank() } ?: ("Subscription #" + System.currentTimeMillis())
 
         onMainDispatcher {
-            displayFragmentWithId(R.id.nav_group)
+            displayFragmentWithId(R.id.nav_configuration)
             MaterialAlertDialogBuilder(this@MainActivity)
                 .setTitle(R.string.subscription_import)
                 .setMessage(getString(R.string.subscription_import_message, name))
