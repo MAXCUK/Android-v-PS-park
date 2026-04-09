@@ -179,7 +179,7 @@ class MainActivity : ThemedActivity(),
         header.findViewById<TextView>(R.id.xboard_header_expiry)?.text = if (expireAt > 0) {
             getString(R.string.xboard_sync_expiry_status, DateFormat.getDateTimeInstance().format(Date(expireAt * 1000)))
         } else {
-            ""
+            "套餐到期时间：长期有效"
         }
     }
 

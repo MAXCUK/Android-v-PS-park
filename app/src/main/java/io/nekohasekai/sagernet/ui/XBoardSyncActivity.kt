@@ -164,7 +164,8 @@ class XBoardSyncActivity : ThemedActivity() {
                 DateFormat.getDateTimeInstance().format(Date(expireAt * 1000))
             )
         } else {
-            expiryView.visibility = View.GONE
+            expiryView.visibility = View.VISIBLE
+            expiryView.text = "套餐到期时间：长期有效"
         }
     }
 }
