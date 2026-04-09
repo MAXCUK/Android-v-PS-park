@@ -38,16 +38,26 @@ class XBoardSyncActivity : ThemedActivity() {
         passwordInput.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         emailInput.setText(DataStore.xboardEmail)
         renderStatus(statusView, trafficView, expiryView)
-        openGroupButton.visibility = if (DataStore.xboardLastGroupId > 0) View.VISIBLE else View.GONE
+
+        val hasLoginState = DataStore.xboardLastGroupId > 0 && DataStore.xboardEmail.isNotBlank()
+        openGroupButton.visibility = if (hasLoginState) View.VISIBLE else View.GONE
+        homeView.visibility = if (hasLoginState) View.GONE else View.VISIBLE
+
+        homeView.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java).apply {
+                putExtra(MainActivity.EXTRA_OPEN_XBOARD_HOME, true)
+            })
+            finish()
+        }
 
         syncButton.setOnClickListener {
             val email = emailInput.text?.toString().orEmpty().trim()
             val password = passwordInput.text?.toString().orEmpty().trim()
             if (email.isBlank() || password.isBlank()) {
-                alert("请先输入邮箱和密码").show()
+                alert(getString(R.string.xboard_sync_login_required)).show()
                 return@setOnClickListener
             }
-            doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, statusView, trafficView, expiryView)
+            doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, homeView, statusView, trafficView, expiryView)
         }
 
         refreshButton.setOnClickListener {
@@ -57,12 +67,14 @@ class XBoardSyncActivity : ThemedActivity() {
                 renderStatus(statusView, trafficView, expiryView)
                 return@setOnClickListener
             }
-            doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, statusView, trafficView, expiryView)
+            doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, homeView, statusView, trafficView, expiryView)
         }
 
         openGroupButton.setOnClickListener {
             DataStore.selectedGroup = DataStore.xboardLastGroupId
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java).apply {
+                putExtra(MainActivity.EXTRA_OPEN_XBOARD_HOME, true)
+            })
             finish()
         }
     }
@@ -73,6 +85,7 @@ class XBoardSyncActivity : ThemedActivity() {
         syncButton: Button,
         refreshButton: Button,
         openGroupButton: Button,
+        homeView: TextView,
         statusView: TextView,
         trafficView: TextView,
         expiryView: TextView
@@ -86,6 +99,7 @@ class XBoardSyncActivity : ThemedActivity() {
                 DataStore.xboardEmail = result.email
                 DataStore.xboardPanelName = result.panelName
                 DataStore.xboardLastGroupId = result.groupId
+                DataStore.selectedGroup = result.groupId
                 DataStore.xboardLastSyncAt = System.currentTimeMillis()
                 DataStore.xboardTrafficUsed = result.usedTraffic
                 DataStore.xboardTrafficTotal = result.totalTraffic
@@ -95,8 +109,11 @@ class XBoardSyncActivity : ThemedActivity() {
                     syncButton.isEnabled = true
                     refreshButton.isEnabled = true
                     openGroupButton.visibility = View.VISIBLE
+                    homeView.visibility = View.GONE
                     renderStatus(statusView, trafficView, expiryView)
-                    startActivity(Intent(this@XBoardSyncActivity, MainActivity::class.java))
+                    startActivity(Intent(this@XBoardSyncActivity, MainActivity::class.java).apply {
+                        putExtra(MainActivity.EXTRA_OPEN_XBOARD_HOME, true)
+                    })
                     finish()
                 }
             }.onFailure {
@@ -107,6 +124,22 @@ class XBoardSyncActivity : ThemedActivity() {
                     alert(it.readableMessage).show()
                 }
             }
+        }
+    }
+
+    private fun formatBinaryTraffic(bytes: Long): String {
+        if (bytes <= 0L) return "0 B"
+        val units = arrayOf("B", "KiB", "MiB", "GiB", "TiB")
+        var value = bytes.toDouble()
+        var unitIndex = 0
+        while (value >= 1024 && unitIndex < units.lastIndex) {
+            value /= 1024.0
+            unitIndex++
+        }
+        return if (unitIndex == 0) {
+            "${value.toLong()} ${units[unitIndex]}"
+        } else {
+            String.format(java.util.Locale.US, "%.2f %s", value, units[unitIndex])
         }
     }
 
@@ -125,9 +158,9 @@ class XBoardSyncActivity : ThemedActivity() {
             trafficView.visibility = View.VISIBLE
             trafficView.text = getString(
                 R.string.xboard_sync_traffic_status,
-                android.text.format.Formatter.formatFileSize(this, total),
-                android.text.format.Formatter.formatFileSize(this, used),
-                android.text.format.Formatter.formatFileSize(this, remaining)
+                formatBinaryTraffic(total),
+                formatBinaryTraffic(used),
+                formatBinaryTraffic(remaining)
             )
         } else {
             trafficView.visibility = View.GONE

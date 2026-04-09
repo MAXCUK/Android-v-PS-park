@@ -58,6 +58,10 @@ class MainActivity : ThemedActivity(),
     OnPreferenceDataStoreChangeListener,
     NavigationView.OnNavigationItemSelectedListener {
 
+    companion object {
+        const val EXTRA_OPEN_XBOARD_HOME = "open_xboard_home"
+    }
+
     lateinit var binding: LayoutMainBinding
     lateinit var navigation: NavigationView
 
@@ -79,8 +83,10 @@ class MainActivity : ThemedActivity(),
         refreshXBoardHeader()
 
         if (savedInstanceState == null) {
-            if (DataStore.xboardLastGroupId > 0L && DataStore.xboardEmail.isNotBlank()) {
-                displayFragmentWithId(R.id.nav_configuration)
+            if (shouldOpenXBoardHome(intent)) {
+                openXBoardHome()
+            } else if (DataStore.xboardLastGroupId > 0L && DataStore.xboardEmail.isNotBlank()) {
+                openXBoardHome()
             } else {
                 startActivity(Intent(this, XBoardSyncActivity::class.java))
             }
@@ -127,6 +133,22 @@ class MainActivity : ThemedActivity(),
         }
     }
 
+    private fun formatBinaryTraffic(bytes: Long): String {
+        if (bytes <= 0L) return "0 B"
+        val units = arrayOf("B", "KiB", "MiB", "GiB", "TiB")
+        var value = bytes.toDouble()
+        var unitIndex = 0
+        while (value >= 1024 && unitIndex < units.lastIndex) {
+            value /= 1024.0
+            unitIndex++
+        }
+        return if (unitIndex == 0) {
+            "${value.toLong()} ${units[unitIndex]}"
+        } else {
+            String.format(java.util.Locale.US, "%.2f %s", value, units[unitIndex])
+        }
+    }
+
     private fun refreshXBoardHeader() {
         val header = navigation.getHeaderView(0)
         header.findViewById<TextView>(R.id.xboard_header_title)?.text = DataStore.xboardPanelName.ifBlank { "星隧互联" }
@@ -138,9 +160,9 @@ class MainActivity : ThemedActivity(),
             val remaining = (total - used).coerceAtLeast(0)
             getString(
                 R.string.xboard_sync_traffic_status,
-                android.text.format.Formatter.formatFileSize(this, total),
-                android.text.format.Formatter.formatFileSize(this, used),
-                android.text.format.Formatter.formatFileSize(this, remaining)
+                formatBinaryTraffic(total),
+                formatBinaryTraffic(used),
+                formatBinaryTraffic(remaining)
             )
         } else {
             getString(R.string.xboard_sync_never)
@@ -161,6 +183,12 @@ class MainActivity : ThemedActivity(),
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
+
+        if (shouldOpenXBoardHome(intent)) {
+            openXBoardHome()
+            return
+        }
 
         val uri = intent.data ?: return
         runOnDefaultDispatcher {
@@ -170,6 +198,17 @@ class MainActivity : ThemedActivity(),
                 importProfile(uri)
             }
         }
+    }
+
+    private fun shouldOpenXBoardHome(intent: Intent?): Boolean {
+        return intent?.getBooleanExtra(EXTRA_OPEN_XBOARD_HOME, false) == true
+    }
+
+    private fun openXBoardHome() {
+        if (DataStore.xboardLastGroupId > 0L) {
+            DataStore.selectedGroup = DataStore.xboardLastGroupId
+        }
+        displayFragmentWithId(R.id.nav_configuration)
     }
 
     fun urlTest(): Int {
@@ -437,5 +476,15 @@ class MainActivity : ThemedActivity(),
         if (binding.drawerLayout.isOpen) return false
         val fragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment
         return fragment != null && fragment.onKeyDown(keyCode, event)
+    }
+}
+nKeyDown(keyCode, event)
+    }
+}
+ragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment
+        return fragment != null && fragment.onKeyDown(keyCode, event)
+    }
+}
+nKeyDown(keyCode, event)
     }
 }
