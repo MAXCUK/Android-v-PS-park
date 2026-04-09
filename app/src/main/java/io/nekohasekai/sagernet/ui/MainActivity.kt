@@ -154,21 +154,7 @@ class MainActivity : ThemedActivity(),
         header.findViewById<TextView>(R.id.xboard_header_title)?.text = DataStore.xboardPanelName.ifBlank { "星隧互联" }
         header.findViewById<TextView>(R.id.xboard_header_email)?.text = DataStore.xboardEmail.ifBlank { getString(R.string.xboard_sync_never) }
 
-        var groupTrafficUsed = 0L
-        val groupId = DataStore.xboardLastGroupId
-        if (groupId > 0L) {
-            try {
-                val profiles: List<ProxyEntity> = SagerDatabase.proxyDao.getByGroup(groupId)
-                var index = 0
-                while (index < profiles.size) {
-                    val profile = profiles[index]
-                    groupTrafficUsed += profile.tx + profile.rx
-                    index++
-                }
-            } catch (_: Exception) {
-            }
-        }
-        val used = if (groupTrafficUsed > 0L) groupTrafficUsed else DataStore.xboardTrafficUsed
+        val used = DataStore.xboardTrafficUsed
         val total = DataStore.xboardTrafficTotal
         val remaining = (total - used).coerceAtLeast(0L)
 
