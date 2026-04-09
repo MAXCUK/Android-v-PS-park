@@ -544,6 +544,3 @@ class MainActivity : ThemedActivity(),
         return fragment != null && fragment.onKeyDown(keyCode, event)
     }
 }
-)
-    }
-}
