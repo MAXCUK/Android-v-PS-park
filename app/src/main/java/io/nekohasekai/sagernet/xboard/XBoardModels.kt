@@ -33,7 +33,8 @@ data class XBoardUserInfo(
     val d: Long = 0,
     val expired_at: Long = 0,
     val uuid: String? = null,
-    val plan_id: Long = 0
+    val plan_id: Long = 0,
+    val plan_name: String? = null
 ) {
     val usedTraffic: Long get() = u + d
     val remainingTraffic: Long get() = (transfer_enable - usedTraffic).coerceAtLeast(0)
@@ -48,6 +49,4 @@ data class XBoardSyncResult(
     val remainingTraffic: Long,
     val expiredAt: Long,
     val planName: String
-)
-: Long
 )
