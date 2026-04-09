@@ -1,86 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/xboard_title"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/xboard_sync_title"
-        android:textAppearance="?attr/textAppearanceHeadline6"
-        android:textStyle="bold" />
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <TextView
-        android:id="@+id/xboard_desc"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/xboard_sync_desc"
-        android:textAppearance="?attr/textAppearanceBody2" />
+        <TextView
+            android:id="@+id/xboard_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/xboard_sync_title"
+            android:textAppearance="?attr/textAppearanceHeadline4"
+            android:textStyle="bold" />
 
-    <EditText
-        android:id="@+id/xboard_email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:hint="@string/xboard_sync_email"
-        android:inputType="textEmailAddress"
-        android:singleLine="true" />
+        <TextView
+            android:id="@+id/xboard_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/xboard_sync_desc"
+            android:textAppearance="?attr/textAppearanceBody1" />
 
-    <EditText
-        android:id="@+id/xboard_password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:hint="@string/xboard_sync_password"
-        android:inputType="textPassword"
-        android:singleLine="true" />
+        <EditText
+            android:id="@+id/xboard_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:hint="@string/xboard_sync_email"
+            android:inputType="textEmailAddress"
+            android:singleLine="true" />
 
-    <Button
-        android:id="@+id/xboard_sync_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/xboard_sync_confirm" />
+        <EditText
+            android:id="@+id/xboard_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:hint="@string/xboard_sync_password"
+            android:inputType="textPassword"
+            android:singleLine="true" />
 
-    <Button
-        android:id="@+id/xboard_refresh_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/xboard_sync_refresh_status" />
+        <Button
+            android:id="@+id/xboard_sync_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="@string/xboard_sync_confirm" />
 
-    <TextView
-        android:id="@+id/xboard_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:textAppearance="?attr/textAppearanceBody2" />
+        <Button
+            android:id="@+id/xboard_refresh_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="@string/xboard_sync_refresh_status" />
 
-    <TextView
-        android:id="@+id/xboard_traffic"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:textAppearance="?attr/textAppearanceBody2"
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/xboard_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:textAppearance="?attr/textAppearanceBody1" />
 
-    <TextView
-        android:id="@+id/xboard_expiry"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textAppearance="?attr/textAppearanceBody2"
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/xboard_traffic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:visibility="gone" />
 
-    <Button
-        android:id="@+id/xboard_open_group_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/xboard_sync_open_group"
-        android:visibility="gone" />
-</LinearLayout>
+        <TextView
+            android:id="@+id/xboard_expiry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/xboard_open_group_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/xboard_sync_open_group"
+            android:visibility="gone" />
+    </LinearLayout>
+</ScrollView>

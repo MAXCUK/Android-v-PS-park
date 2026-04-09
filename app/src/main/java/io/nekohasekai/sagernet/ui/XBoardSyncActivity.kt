@@ -23,8 +23,7 @@ class XBoardSyncActivity : ThemedActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_xboard_sync)
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = getString(R.string.menu_xboard_sync)
+        supportActionBar?.title = getString(R.string.xboard_sync_title)
 
         val emailInput = findViewById<EditText>(R.id.xboard_email)
         val passwordInput = findViewById<EditText>(R.id.xboard_password)
@@ -43,35 +42,11 @@ class XBoardSyncActivity : ThemedActivity() {
         syncButton.setOnClickListener {
             val email = emailInput.text?.toString().orEmpty().trim()
             val password = passwordInput.text?.toString().orEmpty().trim()
-            syncButton.isEnabled = false
-            refreshButton.isEnabled = false
-            statusView.text = getString(R.string.xboard_sync_running)
-            runOnDefaultDispatcher {
-                runCatching {
-                    val result = XBoardSyncManager.loginAndSync(email, password, DataStore.xboardPanelName)
-                    DataStore.xboardEmail = result.email
-                    DataStore.xboardPanelName = result.panelName
-                    DataStore.xboardLastGroupId = result.groupId
-                    DataStore.xboardLastSyncAt = System.currentTimeMillis()
-                    DataStore.xboardTrafficUsed = result.usedTraffic
-                    DataStore.xboardTrafficTotal = result.totalTraffic
-                    DataStore.xboardExpireAt = result.expiredAt
-                }.onSuccess {
-                    onMainDispatcher {
-                        syncButton.isEnabled = true
-                        refreshButton.isEnabled = true
-                        openGroupButton.visibility = View.VISIBLE
-                        renderStatus(statusView, trafficView, expiryView)
-                    }
-                }.onFailure {
-                    onMainDispatcher {
-                        syncButton.isEnabled = true
-                        refreshButton.isEnabled = true
-                        renderStatus(statusView, trafficView, expiryView)
-                        alert(it.readableMessage).show()
-                    }
-                }
+            if (email.isBlank() || password.isBlank()) {
+                alert(getString(R.string.xboard_sync_login_required)).show()
+                return@setOnClickListener
             }
+            doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, statusView, trafficView, expiryView)
         }
 
         refreshButton.setOnClickListener {
@@ -81,41 +56,56 @@ class XBoardSyncActivity : ThemedActivity() {
                 renderStatus(statusView, trafficView, expiryView)
                 return@setOnClickListener
             }
-            syncButton.isEnabled = false
-            refreshButton.isEnabled = false
-            statusView.text = getString(R.string.xboard_sync_running)
-            runOnDefaultDispatcher {
-                runCatching {
-                    val result = XBoardSyncManager.loginAndSync(email, password, DataStore.xboardPanelName)
-                    DataStore.xboardEmail = result.email
-                    DataStore.xboardPanelName = result.panelName
-                    DataStore.xboardLastGroupId = result.groupId
-                    DataStore.xboardLastSyncAt = System.currentTimeMillis()
-                    DataStore.xboardTrafficUsed = result.usedTraffic
-                    DataStore.xboardTrafficTotal = result.totalTraffic
-                    DataStore.xboardExpireAt = result.expiredAt
-                }.onSuccess {
-                    onMainDispatcher {
-                        syncButton.isEnabled = true
-                        refreshButton.isEnabled = true
-                        openGroupButton.visibility = View.VISIBLE
-                        renderStatus(statusView, trafficView, expiryView)
-                    }
-                }.onFailure {
-                    onMainDispatcher {
-                        syncButton.isEnabled = true
-                        refreshButton.isEnabled = true
-                        renderStatus(statusView, trafficView, expiryView)
-                        alert(it.readableMessage).show()
-                    }
-                }
-            }
+            doLoginAndSync(email, password, syncButton, refreshButton, openGroupButton, statusView, trafficView, expiryView)
         }
 
         openGroupButton.setOnClickListener {
             DataStore.selectedGroup = DataStore.xboardLastGroupId
             startActivity(Intent(this, MainActivity::class.java))
             finish()
+        }
+    }
+
+    private fun doLoginAndSync(
+        email: String,
+        password: String,
+        syncButton: Button,
+        refreshButton: Button,
+        openGroupButton: Button,
+        statusView: TextView,
+        trafficView: TextView,
+        expiryView: TextView
+    ) {
+        syncButton.isEnabled = false
+        refreshButton.isEnabled = false
+        statusView.text = getString(R.string.xboard_sync_running)
+        runOnDefaultDispatcher {
+            runCatching {
+                val result = XBoardSyncManager.loginAndSync(email, password, "星隧互联")
+                DataStore.xboardEmail = result.email
+                DataStore.xboardPanelName = result.panelName
+                DataStore.xboardLastGroupId = result.groupId
+                DataStore.xboardLastSyncAt = System.currentTimeMillis()
+                DataStore.xboardTrafficUsed = result.usedTraffic
+                DataStore.xboardTrafficTotal = result.totalTraffic
+                DataStore.xboardExpireAt = result.expiredAt
+            }.onSuccess {
+                onMainDispatcher {
+                    syncButton.isEnabled = true
+                    refreshButton.isEnabled = true
+                    openGroupButton.visibility = View.VISIBLE
+                    renderStatus(statusView, trafficView, expiryView)
+                    startActivity(Intent(this@XBoardSyncActivity, MainActivity::class.java))
+                    finish()
+                }
+            }.onFailure {
+                onMainDispatcher {
+                    syncButton.isEnabled = true
+                    refreshButton.isEnabled = true
+                    renderStatus(statusView, trafficView, expiryView)
+                    alert(it.readableMessage).show()
+                }
+            }
         }
     }
 
@@ -152,10 +142,5 @@ class XBoardSyncActivity : ThemedActivity() {
         } else {
             expiryView.visibility = View.GONE
         }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
     }
 }
