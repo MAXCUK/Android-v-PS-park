@@ -12,6 +12,7 @@ class ProxyRuntimeManager(
     private val runtimeLogRepository: RuntimeLogRepository = RuntimeLogRepository(context)
 ) {
     fun prepare(node: NodeEntity): File {
+        runtimeLogRepository.clear()
         runtimeLogRepository.append("prepare runtime for node=${node.name} type=${node.type}")
         val config = configRepository.saveSelectedNodeConfig(node)
         val runtimeConfig = runtimeBridge.configFile()
