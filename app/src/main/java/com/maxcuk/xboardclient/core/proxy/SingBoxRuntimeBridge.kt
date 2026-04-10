@@ -92,6 +92,8 @@ class SingBoxRuntimeBridge(
     fun status(): RuntimeStatus {
         val binary = installedBinaryFile()
         val installed = binary != null
+        val nativeDir = File(context.applicationInfo.nativeLibraryDir.orEmpty())
+        val nativeEntries = nativeDir.takeIf { it.exists() }?.list()?.sorted()?.joinToString() ?: "(empty)"
         return RuntimeStatus(
             installed = installed,
             binaryPath = binary?.absolutePath.orEmpty(),
@@ -100,7 +102,7 @@ class SingBoxRuntimeBridge(
             message = if (installed) {
                 "sing-box runtime ready"
             } else {
-                "sing-box runtime missing; place one of ${expectedBinaryHints().joinToString()}"
+                "sing-box runtime missing; nativeDir=${nativeDir.absolutePath}; entries=$nativeEntries; expected=${expectedBinaryHints().joinToString()}"
             }
         )
     }
