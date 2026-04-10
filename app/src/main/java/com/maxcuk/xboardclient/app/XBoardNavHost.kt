@@ -1,7 +1,10 @@
 package com.maxcuk.xboardclient.app
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,7 +35,11 @@ object Routes {
 }
 
 @Composable
-fun XBoardNavHost(navController: NavHostController, container: AppContainer) {
+fun XBoardNavHost(
+    navController: NavHostController,
+    container: AppContainer,
+    paddingValues: PaddingValues = PaddingValues(0.dp)
+) {
     val authViewModel = remember {
         AuthViewModel(
             container.authRepository,
@@ -67,6 +74,7 @@ fun XBoardNavHost(navController: NavHostController, container: AppContainer) {
                 onOpenLogs = { navController.navigate(Routes.LOGS) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenLogin = {
+                    authViewModel.disableAutoRestore()
                     navController.navigate(Routes.AUTH) {
                         popUpTo(Routes.HOME) { inclusive = true }
                     }
@@ -74,10 +82,18 @@ fun XBoardNavHost(navController: NavHostController, container: AppContainer) {
             )
         }
         composable(Routes.NODES) {
-            NodesScreen(viewModel = nodesViewModel, onOpenNode = { nodeId -> navController.navigate("${Routes.NODE_DETAIL}/$nodeId") }, onBack = { navController.popBackStack() })
+            NodesScreen(
+                viewModel = nodesViewModel,
+                onOpenNode = { nodeId -> navController.navigate("${Routes.NODE_DETAIL}/$nodeId") },
+                onBack = { navController.popBackStack() }
+            )
         }
         composable("${Routes.NODE_DETAIL}/{nodeId}", arguments = listOf(navArgument("nodeId") { defaultValue = "" })) { backStackEntry ->
-            NodeDetailScreen(nodeId = backStackEntry.arguments?.getString("nodeId").orEmpty(), viewModel = nodeDetailViewModel, onBack = { navController.popBackStack() })
+            NodeDetailScreen(
+                nodeId = backStackEntry.arguments?.getString("nodeId").orEmpty(),
+                viewModel = nodeDetailViewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
         composable(Routes.PROFILE) {
             ProfileScreen(viewModel = profileViewModel, onBack = { navController.popBackStack() })
