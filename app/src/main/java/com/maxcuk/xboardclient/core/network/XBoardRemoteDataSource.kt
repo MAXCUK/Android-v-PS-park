@@ -67,24 +67,41 @@ class XBoardRemoteDataSource(
     }
 
     suspend fun fetchServers(token: String): List<ServerRouteResponse> {
-        val subscriptionInfo = runCatching { getSubscriptionInfo(token) }.getOrNull()
+        val errors = mutableListOf<String>()
+
+        val subscriptionInfo = runCatching { getSubscriptionInfo(token) }
+            .onFailure { errors += "订阅信息失败: ${it.message}" }
+            .getOrNull()
         val subscriptionUrl = subscriptionInfo?.subscribe_url
         if (!subscriptionUrl.isNullOrBlank()) {
-            val fromSubscription = fetchServersFromSubscription(token, subscriptionUrl)
-            if (fromSubscription.isNotEmpty()) return fromSubscription
+            val fromSubscription = runCatching { fetchServersFromSubscription(token, subscriptionUrl) }
+                .onFailure { errors += "订阅解析失败: ${it.message}" }
+                .getOrNull()
+            if (!fromSubscription.isNullOrEmpty()) return fromSubscription
+            errors += "订阅地址返回 0 个可用节点"
+        } else {
+            errors += "未拿到订阅地址"
         }
 
-        val direct = fetchServersDirect(token)
-        if (direct.isNotEmpty()) return direct
+        val direct = runCatching { fetchServersDirect(token) }
+            .onFailure { errors += "摘要接口失败: ${it.message}" }
+            .getOrNull()
+        if (!direct.isNullOrEmpty()) return direct
+        errors += "摘要接口返回 0 个可用节点"
 
-        val guestConfig = runCatching { fetchGuestConfig() }.getOrNull()
+        val guestConfig = runCatching { fetchGuestConfig() }
+            .onFailure { errors += "访客配置失败: ${it.message}" }
+            .getOrNull()
         val guestSubscriptionUrl = guestConfig?.subscribe_url
         if (!guestSubscriptionUrl.isNullOrBlank()) {
-            val fromGuestSubscription = fetchServersFromSubscription(token, guestSubscriptionUrl)
-            if (fromGuestSubscription.isNotEmpty()) return fromGuestSubscription
+            val fromGuestSubscription = runCatching { fetchServersFromSubscription(token, guestSubscriptionUrl) }
+                .onFailure { errors += "访客订阅解析失败: ${it.message}" }
+                .getOrNull()
+            if (!fromGuestSubscription.isNullOrEmpty()) return fromGuestSubscription
+            errors += "访客订阅返回 0 个可用节点"
         }
 
-        error("获取节点失败：订阅与摘要接口都未返回可用节点")
+        error(errors.distinct().joinToString(" | ").ifBlank { "获取节点失败：订阅与摘要接口都未返回可用节点" })
     }
 
     private suspend fun fetchServersDirect(token: String): List<ServerRouteResponse> {

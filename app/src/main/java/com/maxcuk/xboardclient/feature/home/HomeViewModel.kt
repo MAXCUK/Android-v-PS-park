@@ -75,7 +75,7 @@ class HomeViewModel(
                 }
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = if (needsRelogin) "登录态已失效，请重新登录" else message,
+                    error = if (needsRelogin) "登录态已失效，请重新登录" else "加载失败：$message",
                     needsLogin = needsRelogin,
                     runtimeStatus = runtime.message,
                     runtimeBinaryPath = runtime.binaryPath,

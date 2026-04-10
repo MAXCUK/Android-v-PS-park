@@ -73,6 +73,7 @@ class AuthViewModel(
                     refreshScheduler(true)
                 }.onFailure {
                     _uiState.value = _uiState.value.copy(error = "登录成功，但节点同步失败：${it.message ?: "未知错误"}")
+                    throw it
                 }
             }.onSuccess {
                 _uiState.value = _uiState.value.copy(
