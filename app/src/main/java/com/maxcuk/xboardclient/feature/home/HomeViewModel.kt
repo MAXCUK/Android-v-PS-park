@@ -54,7 +54,7 @@ class HomeViewModel(
                     isLoading = false,
                     userInfo = userInfo,
                     sessionEmail = session.email,
-                    selectedNodeName = selected?.name,
+                    selectedNodeName = selected?.name ?: session.email,
                     nodeCount = servers.size,
                     vpnState = vpnController.state.value,
                     autoReconnect = true,

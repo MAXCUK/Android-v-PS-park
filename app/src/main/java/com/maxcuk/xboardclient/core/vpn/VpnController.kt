@@ -29,6 +29,7 @@ class VpnController(
             val intent = Intent(context, XBoardVpnService::class.java).apply {
                 action = XBoardVpnService.ACTION_CONNECT
                 putExtra(XBoardVpnService.EXTRA_CONFIG_PATH, configFile.absolutePath)
+                putExtra(XBoardVpnService.EXTRA_NODE_NAME, node.name)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
@@ -49,6 +50,8 @@ class VpnController(
         }
         return connectSelectedNode()
     }
+
+    suspend fun refreshSelectedNodeName(): String? = nodeRepository.currentSelectedNode()?.name
 
     fun runtimeInfo(): String = proxyRuntimeManager.runtimeInfo()
 

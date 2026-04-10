@@ -18,11 +18,13 @@ class XBoardVpnService : VpnService() {
     private val logRepository by lazy { RuntimeLogRepository(applicationContext) }
     private val boxRunner by lazy { BoxServiceRunner(applicationContext, this, logRepository) }
     private var tunConnection: ParcelFileDescriptor? = null
+    private var currentNodeName: String = "未选择节点"
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_CONNECT -> {
-                startForeground(NOTIFICATION_ID, buildNotification("正在连接代理"))
+                currentNodeName = intent.getStringExtra(EXTRA_NODE_NAME).orEmpty().ifBlank { "未选择节点" }
+                startForeground(NOTIFICATION_ID, buildNotification("正在连接 · $currentNodeName"))
                 val configPath = intent.getStringExtra(EXTRA_CONFIG_PATH)
                 if (configPath.isNullOrBlank()) {
                     logRepository.append("vpn start failed: empty config path")
@@ -36,6 +38,7 @@ class XBoardVpnService : VpnService() {
                     stopSelf()
                     return START_NOT_STICKY
                 }
+                notifyConnectedState()
             }
             ACTION_DISCONNECT -> {
                 boxRunner.close()
@@ -59,6 +62,7 @@ class XBoardVpnService : VpnService() {
 
         tunConnection = builder.establish() ?: error("建立 VPN TUN 失败")
         logRepository.append("tun established fd=${tunConnection!!.fd}")
+        notifyConnectedState()
         return tunConnection!!.fd
     }
 
@@ -76,9 +80,7 @@ class XBoardVpnService : VpnService() {
             builder.addAddress(item.address(), item.prefix())
             added = true
         }
-        if (!added) {
-            builder.addAddress("172.19.0.1", 30)
-        }
+        if (!added) builder.addAddress("172.19.0.1", 30)
     }
 
     private fun addRoutes(builder: Builder, options: TunOptions) {
@@ -103,11 +105,7 @@ class XBoardVpnService : VpnService() {
 
     private fun addDns(builder: Builder, options: TunOptions) {
         val dns = options.dnsServerAddressOrNull()
-        if (!dns.isNullOrBlank()) {
-            builder.addDnsServer(dns)
-        } else {
-            builder.addDnsServer("1.1.1.1")
-        }
+        if (!dns.isNullOrBlank()) builder.addDnsServer(dns) else builder.addDnsServer("1.1.1.1")
     }
 
     private fun addAppRules(builder: Builder, options: TunOptions) {
@@ -119,20 +117,21 @@ class XBoardVpnService : VpnService() {
         while (excludeIterator.hasNext()) excludes += excludeIterator.next()
 
         if (includes.isNotEmpty()) {
-            includes.distinct().filter { it != packageName }.forEach {
-                runCatching { builder.addAllowedApplication(it) }
-            }
+            includes.distinct().filter { it != packageName }.forEach { runCatching { builder.addAllowedApplication(it) } }
         }
         if (excludes.isNotEmpty()) {
-            excludes.distinct().forEach {
-                runCatching { builder.addDisallowedApplication(it) }
-            }
+            excludes.distinct().forEach { runCatching { builder.addDisallowedApplication(it) } }
         }
     }
 
     private fun closeTun() {
         runCatching { tunConnection?.close() }
         tunConnection = null
+    }
+
+    private fun notifyConnectedState() {
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(NOTIFICATION_ID, buildNotification("已连接 · $currentNodeName"))
     }
 
     override fun onRevoke() {
@@ -171,6 +170,7 @@ class XBoardVpnService : VpnService() {
             .setSmallIcon(android.R.drawable.stat_sys_download_done)
             .setContentTitle("星隧互联")
             .setContentText(text)
+            .setSubText(currentNodeName)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .build()
@@ -180,6 +180,7 @@ class XBoardVpnService : VpnService() {
         const val ACTION_CONNECT = "com.xingsuihulian.app.action.CONNECT"
         const val ACTION_DISCONNECT = "com.xingsuihulian.app.action.DISCONNECT"
         const val EXTRA_CONFIG_PATH = "com.xingsuihulian.app.extra.CONFIG_PATH"
+        const val EXTRA_NODE_NAME = "com.xingsuihulian.app.extra.NODE_NAME"
         private const val CHANNEL_ID = "xingsuihulian_vpn"
         private const val NOTIFICATION_ID = 1001
     }
