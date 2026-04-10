@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import com.maxcuk.xboardclient.core.proxy.model.RuntimeStatus
 import java.io.File
+import java.util.zip.ZipFile
 
 class SingBoxRuntimeBridge(
     private val context: Context
@@ -39,13 +40,7 @@ class SingBoxRuntimeBridge(
     }
 
     fun installedBinaryFile(): File? {
-        val nativeDir = File(context.applicationInfo.nativeLibraryDir.orEmpty())
-        if (nativeDir.exists()) {
-            candidateBinaryNames().forEach { name ->
-                val file = File(nativeDir, name)
-                if (file.exists()) return file
-            }
-        }
+        findBundledNativeBinary()?.let { return it }
 
         val extractedDir = runtimeDir()
         candidateBinaryNames().forEach { name ->
@@ -56,24 +51,69 @@ class SingBoxRuntimeBridge(
         return null
     }
 
-    fun ensureRuntimeExecutable(): File? {
-        installedBinaryFile()?.let { existing ->
-            existing.setExecutable(true, false)
-            return existing
+    private fun findBundledNativeBinary(): File? {
+        val nativeDir = File(context.applicationInfo.nativeLibraryDir.orEmpty())
+        if (nativeDir.exists()) {
+            candidateBinaryNames().forEach { name ->
+                val file = File(nativeDir, name)
+                if (file.exists()) return file
+            }
         }
+        return null
+    }
 
+    private fun extractBinaryFromAssets(): File? {
         val assetManager = context.assets
-        val runtimeDir = runtimeDir()
+        val targetDir = runtimeDir()
         candidateBinaryNames().forEach { name ->
             runCatching {
                 assetManager.open("${assetRuntimeDir()}/$name").use { input ->
-                    val out = File(runtimeDir, name)
+                    val out = File(targetDir, name)
                     out.outputStream().use { output -> input.copyTo(output) }
                     out.setExecutable(true, false)
                     return out
                 }
             }
         }
+        return null
+    }
+
+    private fun extractBinaryFromApkLibs(): File? {
+        val apkPaths = buildList {
+            context.applicationInfo.sourceDir?.takeIf { it.isNotBlank() }?.let(::add)
+            context.applicationInfo.splitSourceDirs?.filter { !it.isNullOrBlank() }?.let { addAll(it) }
+        }
+
+        val targetDir = runtimeDir()
+        apkPaths.forEach { apkPath ->
+            runCatching {
+                ZipFile(apkPath).use { zip ->
+                    supportedAbis().forEach { abi ->
+                        candidateBinaryNames().forEach { name ->
+                            val entry = zip.getEntry("lib/$abi/$name") ?: return@forEach
+                            val out = File(targetDir, name)
+                            zip.getInputStream(entry).use { input ->
+                                out.outputStream().use { output -> input.copyTo(output) }
+                            }
+                            out.setExecutable(true, false)
+                            return out
+                        }
+                    }
+                }
+            }
+        }
+        return null
+    }
+
+    fun ensureRuntimeExecutable(): File? {
+        installedBinaryFile()?.let { existing ->
+            existing.setExecutable(true, false)
+            return existing
+        }
+
+        extractBinaryFromAssets()?.let { return it }
+        extractBinaryFromApkLibs()?.let { return it }
+
         return null
     }
 
@@ -90,7 +130,7 @@ class SingBoxRuntimeBridge(
     }
 
     fun status(): RuntimeStatus {
-        val binary = installedBinaryFile()
+        val binary = installedBinaryFile() ?: ensureRuntimeExecutable()
         val installed = binary != null
         val nativeDir = File(context.applicationInfo.nativeLibraryDir.orEmpty())
         val nativeEntries = nativeDir.takeIf { it.exists() }?.list()?.sorted()?.joinToString() ?: "(empty)"
