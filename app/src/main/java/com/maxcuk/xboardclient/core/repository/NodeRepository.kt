@@ -19,23 +19,21 @@ class NodeRepository(
         val selectedId = nodeDao.getSelectedNode()?.id ?: connectionPrefs?.lastSelectedNode?.firstOrNull()
         val mapped = servers.mapIndexedNotNull { index, item ->
             val stableId = item.route_id ?: item.id?.toString() ?: "node_$index"
-            val type = normalizeType(item.type)
             val host = (item.host ?: item.address ?: item.server).orEmpty().trim()
             val port = item.port ?: 0
-            val method = item.method ?: item.cipher
+            if (host.isBlank() || port <= 0) return@mapIndexedNotNull null
+
+            val method = item.method?.trim().orEmpty().ifBlank { item.cipher?.trim().orEmpty() }.ifBlank { null }
             val password = item.password?.trim()
             val uuid = item.uuid?.trim()
-            val security = item.security?.trim()
+            val security = item.security?.trim().orEmpty().ifBlank { item.tls?.trim().orEmpty() }.ifBlank { null }
+            val inferredType = inferType(item.type, uuid = uuid, method = method, password = password)
             val normalizedName = item.remarks ?: item.name ?: item.address ?: item.server ?: "Node $index"
-
-            val hasCoreEndpoint = host.isNotBlank() && port > 0
-            val hasProtocolHint = type != "unknown" || !method.isNullOrBlank() || !uuid.isNullOrBlank() || !password.isNullOrBlank() || !security.isNullOrBlank()
-            if (!hasCoreEndpoint || !hasProtocolHint) return@mapIndexedNotNull null
 
             NodeEntity(
                 id = stableId,
                 name = normalizedName,
-                type = type,
+                type = inferredType,
                 host = host,
                 port = port,
                 uuid = uuid,
@@ -55,11 +53,13 @@ class NodeRepository(
                 isSelected = stableId == selectedId
             )
         }
+
         val effective = when {
             mapped.isEmpty() -> emptyList()
             mapped.any { it.isSelected } -> mapped
             else -> mapped.mapIndexed { index, node -> node.copy(isSelected = index == 0) }
         }
+
         nodeDao.clearAll()
         nodeDao.upsertAll(effective)
         effective.firstOrNull { it.isSelected }?.let { connectionPrefs?.setLastSelectedNode(it.id) }
@@ -72,11 +72,13 @@ class NodeRepository(
 
     suspend fun currentSelectedNode() = nodeDao.getSelectedNode()
 
-    private fun normalizeType(type: String?): String {
+    private fun inferType(type: String?, uuid: String?, method: String?, password: String?): String {
         val value = type?.lowercase().orEmpty()
         return when {
             value.contains("shadowsocks") || value == "ss" -> "shadowsocks"
             value.contains("vless") -> "vless"
+            !uuid.isNullOrBlank() -> "vless"
+            !method.isNullOrBlank() && !password.isNullOrBlank() -> "shadowsocks"
             else -> value.ifBlank { "unknown" }
         }
     }
