@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 data class HomeUiState(
     val isLoading: Boolean = false,
     val userInfo: UserInfoResponse? = null,
+    val sessionEmail: String? = null,
     val selectedNodeName: String? = null,
     val nodeCount: Int = 0,
     val vpnState: VpnConnectionState = VpnConnectionState.DISCONNECTED,
@@ -49,13 +50,12 @@ class HomeViewModel(
                 val servers = remote.fetchServers(session.authToken)
                 nodeRepository.replaceNodes(servers)
                 val selected = nodeRepository.currentSelectedNode()
-                Triple(userInfo, selected?.name, servers.size)
-            }.onSuccess { (userInfo, selectedName, nodeCount) ->
-                _uiState.value = _uiState.value.copy(
+                HomeUiState(
                     isLoading = false,
                     userInfo = userInfo,
-                    selectedNodeName = selectedName,
-                    nodeCount = nodeCount,
+                    sessionEmail = session.email,
+                    selectedNodeName = selected?.name,
+                    nodeCount = servers.size,
                     vpnState = vpnController.state.value,
                     autoReconnect = true,
                     runtimeStatus = runtime.message,
@@ -65,6 +65,8 @@ class HomeViewModel(
                     error = null,
                     needsLogin = false
                 )
+            }.onSuccess {
+                _uiState.value = it
             }.onFailure {
                 val message = it.message ?: "加载失败"
                 _uiState.value = _uiState.value.copy(
@@ -80,8 +82,13 @@ class HomeViewModel(
         }
     }
 
-    fun requestConnect() { _uiState.value = _uiState.value.copy(needsVpnPermission = true, error = null) }
-    fun onVpnPermissionHandled() { _uiState.value = _uiState.value.copy(needsVpnPermission = false) }
+    fun requestConnect() {
+        _uiState.value = _uiState.value.copy(needsVpnPermission = true, error = null)
+    }
+
+    fun onVpnPermissionHandled() {
+        _uiState.value = _uiState.value.copy(needsVpnPermission = false)
+    }
 
     fun connectOrDisconnect() {
         viewModelScope.launch {
@@ -89,7 +96,9 @@ class HomeViewModel(
                 VpnConnectionState.CONNECTED, VpnConnectionState.PREPARING -> vpnController.disconnect()
                 else -> {
                     val result = vpnController.connectSelectedNode()
-                    if (result.isFailure) _uiState.value = _uiState.value.copy(error = result.exceptionOrNull()?.message)
+                    if (result.isFailure) {
+                        _uiState.value = _uiState.value.copy(error = result.exceptionOrNull()?.message)
+                    }
                 }
             }
             val runtime = vpnController.runtimeStatus()

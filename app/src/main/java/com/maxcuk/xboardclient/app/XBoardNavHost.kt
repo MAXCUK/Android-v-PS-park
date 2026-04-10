@@ -49,7 +49,15 @@ fun XBoardNavHost(navController: NavHostController, container: AppContainer) {
 
     NavHost(navController = navController, startDestination = Routes.AUTH) {
         composable(Routes.AUTH) {
-            AuthScreen(viewModel = authViewModel, defaultBaseUrl = "https://ax.ty666.help", onLoginClick = { navController.navigate(Routes.HOME) })
+            AuthScreen(
+                viewModel = authViewModel,
+                defaultBaseUrl = "https://ax.ty666.help",
+                onLoginClick = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.AUTH) { inclusive = true }
+                    }
+                }
+            )
         }
         composable(Routes.HOME) {
             HomeScreen(

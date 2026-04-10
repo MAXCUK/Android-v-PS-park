@@ -34,8 +34,8 @@ fun AuthScreen(
         if (baseUrl.isNotBlank()) viewModel.preloadSite(baseUrl)
     }
 
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) onLoginClick()
+    LaunchedEffect(uiState.isSuccess, uiState.hasLocalSession, uiState.restoringSession) {
+        if ((uiState.isSuccess || uiState.hasLocalSession) && !uiState.restoringSession) onLoginClick()
     }
 
     Column(
@@ -45,28 +45,33 @@ fun AuthScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(text = uiState.siteName ?: "登录 XBoard")
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("邮箱") }
-        )
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("密码") }
-        )
-        uiState.error?.let { Text(text = it) }
-        Button(
-            onClick = { viewModel.login(baseUrl, email, password, onLoginClick) },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = email.isNotBlank() && password.isNotBlank() && !uiState.isLoading
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator()
-            } else {
-                Text("登录并同步节点")
+
+        if (uiState.restoringSession) {
+            Text(text = "正在恢复本地登录态…")
+        } else {
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("邮箱") }
+            )
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("密码") }
+            )
+            uiState.error?.let { Text(text = it) }
+            Button(
+                onClick = { viewModel.login(baseUrl, email, password, onLoginClick) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = email.isNotBlank() && password.isNotBlank() && !uiState.isLoading
+            ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator()
+                } else {
+                    Text("登录并同步节点")
+                }
             }
         }
     }

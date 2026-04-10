@@ -15,7 +15,9 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val isSuccess: Boolean = false,
-    val siteName: String? = null
+    val siteName: String? = null,
+    val hasLocalSession: Boolean = false,
+    val restoringSession: Boolean = true
 )
 
 class AuthViewModel(
@@ -25,6 +27,16 @@ class AuthViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            val session = authRepository.currentSession()
+            _uiState.value = _uiState.value.copy(
+                hasLocalSession = session != null,
+                restoringSession = false
+            )
+        }
+    }
 
     fun preloadSite(baseUrl: String) {
         viewModelScope.launch {
@@ -40,7 +52,12 @@ class AuthViewModel(
 
     fun login(baseUrl: String, email: String, password: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            _uiState.value = AuthUiState(isLoading = true, siteName = _uiState.value.siteName)
+            _uiState.value = AuthUiState(
+                isLoading = true,
+                siteName = _uiState.value.siteName,
+                hasLocalSession = _uiState.value.hasLocalSession,
+                restoringSession = false
+            )
             runCatching {
                 val normalizedBaseUrl = NetworkFactory.normalizeBaseUrl(baseUrl)
                 val remote = XBoardRemoteDataSource(NetworkFactory.create(normalizedBaseUrl), normalizedBaseUrl)
@@ -54,10 +71,19 @@ class AuthViewModel(
                     _uiState.value = _uiState.value.copy(error = "登录成功，但节点同步失败：${it.message ?: "未知错误"}")
                 }
             }.onSuccess {
-                _uiState.value = _uiState.value.copy(isLoading = false, isSuccess = true)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isSuccess = true,
+                    hasLocalSession = true,
+                    restoringSession = false
+                )
                 onSuccess()
             }.onFailure {
-                _uiState.value = _uiState.value.copy(isLoading = false, error = it.message ?: "登录失败")
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = it.message ?: "登录失败",
+                    restoringSession = false
+                )
             }
         }
     }

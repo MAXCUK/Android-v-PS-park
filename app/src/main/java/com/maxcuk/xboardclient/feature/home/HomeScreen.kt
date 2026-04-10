@@ -77,7 +77,7 @@ fun HomeScreen(
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("连接状态：$statusText")
                 Text("当前节点：${uiState.selectedNodeName ?: if (uiState.nodeCount > 0) "请选择节点" else "暂无节点"}")
-                Text("账号邮箱：${uiState.userInfo?.email ?: "--"}")
+                Text("账号邮箱：${uiState.userInfo?.email ?: uiState.sessionEmail ?: "--"}")
                 Text("节点数量：${uiState.nodeCount}")
                 Text("套餐流量：${formatBytes(uiState.userInfo?.transfer_enable)}")
                 Text("已用上行：${formatBytes(uiState.userInfo?.u)}")
