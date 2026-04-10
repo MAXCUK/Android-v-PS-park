@@ -9,7 +9,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/bg_liquid_scene">
+        android:background="#F7F8FC">
 
         <LinearLayout
             android:layout_width="match_parent"

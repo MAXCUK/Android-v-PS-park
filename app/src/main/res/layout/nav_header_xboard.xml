@@ -31,8 +31,14 @@
         android:id="@+id/xboard_header_traffic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:textAppearance="?attr/textAppearanceBody2" />
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_xboard_chip"
+        android:paddingLeft="12dp"
+        android:paddingTop="8dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="8dp"
+        android:textAppearance="?attr/textAppearanceBody2"
+        android:textColor="#1F2937" />
 
     <TextView
         android:id="@+id/xboard_header_expiry"
