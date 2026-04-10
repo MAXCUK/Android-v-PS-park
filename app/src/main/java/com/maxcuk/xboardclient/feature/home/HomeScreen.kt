@@ -3,14 +3,17 @@ package com.maxcuk.xboardclient.feature.home
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +21,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.maxcuk.xboardclient.core.vpn.VpnPermissionHelper
@@ -70,22 +75,53 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFF101114), Color(0xFF181B22), Color(0xFF111318))
+                )
+            )
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("连接状态：$statusText")
-                Text("当前节点：${uiState.selectedNodeName ?: if (uiState.nodeCount > 0) "请选择节点" else "暂无节点"}")
-                Text("账号邮箱：${uiState.userInfo?.email ?: uiState.sessionEmail ?: "--"}")
-                Text("节点数量：${uiState.nodeCount}")
-                Text("套餐流量：${formatBytes(uiState.userInfo?.transfer_enable)}")
-                Text("已用上行：${formatBytes(uiState.userInfo?.u)}")
-                Text("已用下行：${formatBytes(uiState.userInfo?.d)}")
-                Text("到期时间：${formatExpiry(uiState.userInfo?.expired_at)}")
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Brush.verticalGradient(listOf(Color(0xFF1F2530), Color(0xFF161B23))))
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text("星隧互联", color = Color.White, style = MaterialTheme.typography.titleLarge)
+                Text("连接状态：$statusText", color = Color(0xFFB8C0CC))
+                Text(
+                    "当前节点：${uiState.selectedNodeName ?: if (uiState.nodeCount > 0) "请选择节点" else "暂无节点"}",
+                    color = Color.White
+                )
+                Text("账号邮箱：${uiState.userInfo?.email ?: uiState.sessionEmail ?: "--"}", color = Color(0xFFB8C0CC))
                 uiState.error?.takeIf { it.isNotBlank() }?.let {
-                    Text("提示：$it")
+                    Text("提示：$it", color = Color(0xFFFFB86B))
                 }
+                Button(onClick = {
+                    if (uiState.vpnState.name == "CONNECTED") viewModel.connectOrDisconnect() else viewModel.requestConnect()
+                }, modifier = Modifier.fillMaxWidth()) {
+                    Text(if (uiState.vpnState.name == "CONNECTED") "断开连接" else "一键连接")
+                }
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            MetricCard("节点数量", uiState.nodeCount.toString(), Modifier.weight(1f))
+            MetricCard("套餐流量", formatBytes(uiState.userInfo?.transfer_enable), Modifier.weight(1f))
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            MetricCard("已用上行", formatBytes(uiState.userInfo?.u), Modifier.weight(1f))
+            MetricCard("已用下行", formatBytes(uiState.userInfo?.d), Modifier.weight(1f))
+        }
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text("到期时间：${formatExpiry(uiState.userInfo?.expired_at)}")
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -93,24 +129,24 @@ fun HomeScreen(
                     Text("自动重连")
                     Switch(checked = uiState.autoReconnect, onCheckedChange = viewModel::setAutoReconnect)
                 }
-                Button(onClick = {
-                    if (uiState.vpnState.name == "CONNECTED") viewModel.connectOrDisconnect() else viewModel.requestConnect()
-                }, modifier = Modifier.fillMaxWidth()) {
-                    Text(if (uiState.vpnState.name == "CONNECTED") "断开连接" else "一键连接")
-                }
+                Button(onClick = onOpenNodes, modifier = Modifier.fillMaxWidth()) { Text("选择节点") }
                 Button(onClick = {
                     if (uiState.userInfo == null) onOpenLogin() else viewModel.refresh()
                 }, modifier = Modifier.fillMaxWidth()) {
-                    Text(if (uiState.userInfo == null) "重新登录" else "从面板刷新")
+                    Text(if (uiState.userInfo == null) "重新登录" else "刷新账户与节点")
                 }
+                Button(onClick = onOpenLogs, modifier = Modifier.fillMaxWidth()) { Text("查看运行日志") }
             }
         }
+    }
+}
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = onOpenNodes, modifier = Modifier.fillMaxWidth()) { Text("节点列表") }
-            Button(onClick = onOpenProfile, modifier = Modifier.fillMaxWidth()) { Text("账户信息") }
-            Button(onClick = onOpenLogs, modifier = Modifier.fillMaxWidth()) { Text("运行日志") }
-            Button(onClick = onOpenSettings, modifier = Modifier.fillMaxWidth()) { Text("设置") }
+@Composable
+private fun MetricCard(title: String, value: String, modifier: Modifier = Modifier) {
+    Card(modifier = modifier) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(title, color = Color(0xFF7E8794))
+            Text(value, color = Color.White, style = MaterialTheme.typography.titleMedium)
         }
     }
 }

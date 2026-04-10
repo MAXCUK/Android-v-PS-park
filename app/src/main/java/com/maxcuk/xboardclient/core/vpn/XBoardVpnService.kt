@@ -19,12 +19,15 @@ class XBoardVpnService : VpnService() {
     private val boxRunner by lazy { BoxServiceRunner(applicationContext, this, logRepository) }
     private var tunConnection: ParcelFileDescriptor? = null
     private var currentNodeName: String = "未选择节点"
+    private var currentStatusLine: String = "未连接"
+    private var currentRateLine: String = "↑ 0 B/s   ↓ 0 B/s"
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_CONNECT -> {
                 currentNodeName = intent.getStringExtra(EXTRA_NODE_NAME).orEmpty().ifBlank { "未选择节点" }
-                startForeground(NOTIFICATION_ID, buildNotification("正在连接 · $currentNodeName"))
+                currentStatusLine = "正在连接"
+                startForeground(NOTIFICATION_ID, buildNotification())
                 val configPath = intent.getStringExtra(EXTRA_CONFIG_PATH)
                 if (configPath.isNullOrBlank()) {
                     logRepository.append("vpn start failed: empty config path")
@@ -38,9 +41,11 @@ class XBoardVpnService : VpnService() {
                     stopSelf()
                     return START_NOT_STICKY
                 }
+                currentStatusLine = "已连接"
                 notifyConnectedState()
             }
             ACTION_DISCONNECT -> {
+                currentStatusLine = "已断开"
                 boxRunner.close()
                 closeTun()
                 stopSelf()
@@ -62,6 +67,7 @@ class XBoardVpnService : VpnService() {
 
         tunConnection = builder.establish() ?: error("建立 VPN TUN 失败")
         logRepository.append("tun established fd=${tunConnection!!.fd}")
+        currentStatusLine = "已连接"
         notifyConnectedState()
         return tunConnection!!.fd
     }
@@ -131,7 +137,7 @@ class XBoardVpnService : VpnService() {
 
     private fun notifyConnectedState() {
         val manager = getSystemService(NotificationManager::class.java)
-        manager.notify(NOTIFICATION_ID, buildNotification("已连接 · $currentNodeName"))
+        manager.notify(NOTIFICATION_ID, buildNotification())
     }
 
     override fun onRevoke() {
@@ -147,7 +153,7 @@ class XBoardVpnService : VpnService() {
         super.onDestroy()
     }
 
-    private fun buildNotification(text: String): Notification {
+    private fun buildNotification(): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(
@@ -168,9 +174,10 @@ class XBoardVpnService : VpnService() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_sys_download_done)
-            .setContentTitle("星隧互联")
-            .setContentText(text)
-            .setSubText(currentNodeName)
+            .setContentTitle("星隧互联 · $currentStatusLine")
+            .setContentText(currentNodeName)
+            .setSubText(currentRateLine)
+            .setStyle(NotificationCompat.BigTextStyle().bigText("$currentNodeName\n$currentRateLine"))
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .build()
