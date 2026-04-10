@@ -48,7 +48,7 @@ fun XBoardNavHost(
         )
     }
     val homeViewModel = remember { HomeViewModel(container.authRepository, container.nodeRepository, container.vpnController) }
-    val nodesViewModel = remember { NodesViewModel(container.nodeRepository) }
+    val nodesViewModel = remember { NodesViewModel(container.nodeRepository, container.authRepository) }
     val profileViewModel = remember { ProfileViewModel(container.authRepository) }
     val logsViewModel = remember { LogsViewModel(container.vpnController) }
     val nodeDetailViewModel = remember { NodeDetailViewModel(container.nodeRepository) }

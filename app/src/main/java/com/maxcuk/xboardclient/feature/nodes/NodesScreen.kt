@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,11 +37,15 @@ fun NodesScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(text = "节点列表", color = Color.White, style = MaterialTheme.typography.titleLarge)
+        Button(onClick = { viewModel.refreshFromPanel() }, modifier = Modifier.fillMaxWidth()) {
+            Text(if (uiState.isRefreshing) "正在同步官方节点..." else "同步官方节点")
+        }
+        uiState.message?.let { Text(it, color = Color(0xFFFFB86B)) }
         if (uiState.nodes.isEmpty()) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(text = "暂无节点", color = Color.White)
-                    Text(text = "请先登录同步官方订阅后再试", color = Color(0xFFB8C0CC))
+                    Text(text = "请点击上方按钮直接从官方面板同步", color = Color(0xFFB8C0CC))
                 }
             }
         } else {
