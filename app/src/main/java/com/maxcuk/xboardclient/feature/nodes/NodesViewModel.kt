@@ -10,9 +10,8 @@ import com.maxcuk.xboardclient.core.repository.NodeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -60,8 +59,12 @@ class NodesViewModel(
                 val servers = remote.fetchServers(session.authToken)
                 check(servers.isNotEmpty()) { "官方面板返回 0 个节点" }
                 nodeRepository.replaceNodes(servers)
+                val storedNodes = nodeRepository.observeNodes().first()
+                val storedCount = storedNodes.size
+                check(storedCount > 0) { "同步后仍为 0 个节点：接口返回 ${servers.size} 个，但没有任何节点成功入库" }
+                "节点同步完成，共 ${storedCount} 个节点"
             }.onSuccess {
-                messageState.value = "节点同步完成"
+                messageState.value = it
             }.onFailure {
                 messageState.value = "节点同步失败：${it.message ?: "未知错误"}"
             }

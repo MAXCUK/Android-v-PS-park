@@ -85,6 +85,7 @@ fun XBoardNavHost(
             NodesScreen(
                 viewModel = nodesViewModel,
                 onOpenNode = { nodeId -> navController.navigate("${Routes.NODE_DETAIL}/$nodeId") },
+                onSelectNode = { nodeId -> nodesViewModel.selectNode(nodeId) },
                 onBack = { navController.popBackStack() }
             )
         }

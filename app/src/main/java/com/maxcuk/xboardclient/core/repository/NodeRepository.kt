@@ -23,22 +23,25 @@ class NodeRepository(
             val host = (item.host ?: item.address ?: item.server).orEmpty().trim()
             val port = item.port ?: 0
             val method = item.method ?: item.cipher
-            val hasRequiredFields = when (type) {
-                "shadowsocks" -> host.isNotBlank() && port > 0 && !method.isNullOrBlank() && !item.password.isNullOrBlank()
-                "vless" -> host.isNotBlank() && port > 0 && !item.uuid.isNullOrBlank()
-                else -> host.isNotBlank() && port > 0
-            }
-            if (!hasRequiredFields) return@mapIndexedNotNull null
+            val password = item.password?.trim()
+            val uuid = item.uuid?.trim()
+            val security = item.security?.trim()
+            val normalizedName = item.remarks ?: item.name ?: item.address ?: item.server ?: "Node $index"
+
+            val hasCoreEndpoint = host.isNotBlank() && port > 0
+            val hasProtocolHint = type != "unknown" || !method.isNullOrBlank() || !uuid.isNullOrBlank() || !password.isNullOrBlank() || !security.isNullOrBlank()
+            if (!hasCoreEndpoint || !hasProtocolHint) return@mapIndexedNotNull null
+
             NodeEntity(
                 id = stableId,
-                name = item.remarks ?: item.name ?: item.address ?: item.server ?: "Node $index",
+                name = normalizedName,
                 type = type,
                 host = host,
                 port = port,
-                uuid = item.uuid,
-                password = item.password,
+                uuid = uuid,
+                password = password,
                 method = method,
-                security = item.security,
+                security = security,
                 flow = item.flow,
                 sni = item.sni,
                 network = item.network ?: item.transport,
@@ -52,8 +55,14 @@ class NodeRepository(
                 isSelected = stableId == selectedId
             )
         }
+        val effective = when {
+            mapped.isEmpty() -> emptyList()
+            mapped.any { it.isSelected } -> mapped
+            else -> mapped.mapIndexed { index, node -> node.copy(isSelected = index == 0) }
+        }
         nodeDao.clearAll()
-        nodeDao.upsertAll(mapped)
+        nodeDao.upsertAll(effective)
+        effective.firstOrNull { it.isSelected }?.let { connectionPrefs?.setLastSelectedNode(it.id) }
     }
 
     suspend fun selectNode(nodeId: String) {

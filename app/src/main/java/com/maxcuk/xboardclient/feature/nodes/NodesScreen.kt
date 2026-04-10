@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 fun NodesScreen(
     viewModel: NodesViewModel,
     onOpenNode: (String) -> Unit,
+    onSelectNode: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -56,11 +59,19 @@ fun NodesScreen(
                             .fillMaxWidth()
                             .clickable { onOpenNode(node.id) }
                     ) {
-                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             Text(text = node.name, color = Color.White)
                             Text(text = "协议：${node.type}", color = Color(0xFFB8C0CC))
                             Text(text = "地址：${node.host}:${node.port}", color = Color(0xFFB8C0CC))
-                            Text(text = if (node.isSelected) "已选中" else "点击查看详情", color = Color(0xFF9C7BFF))
+                            Text(text = if (node.isSelected) "当前节点" else "可设为当前节点", color = Color(0xFF9C7BFF))
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                                OutlinedButton(onClick = { onOpenNode(node.id) }, modifier = Modifier.weight(1f)) {
+                                    Text("查看详情")
+                                }
+                                Button(onClick = { onSelectNode(node.id) }, modifier = Modifier.weight(1f)) {
+                                    Text(if (node.isSelected) "已选中" else "设为当前")
+                                }
+                            }
                         }
                     }
                 }

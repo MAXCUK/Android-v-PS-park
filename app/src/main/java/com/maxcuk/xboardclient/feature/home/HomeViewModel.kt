@@ -9,9 +9,12 @@ import com.maxcuk.xboardclient.core.repository.AuthRepository
 import com.maxcuk.xboardclient.core.repository.NodeRepository
 import com.maxcuk.xboardclient.core.vpn.VpnConnectionState
 import com.maxcuk.xboardclient.core.vpn.VpnController
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 data class HomeUiState(
@@ -39,6 +42,24 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    init {
+        nodeRepository.observeNodes()
+            .onEach { nodes ->
+                val selected = nodes.firstOrNull { it.isSelected }
+                _uiState.value = _uiState.value.copy(
+                    selectedNodeName = selected?.name,
+                    nodeCount = nodes.size
+                )
+            }
+            .launchIn(viewModelScope)
+
+        vpnController.state
+            .onEach { state ->
+                _uiState.value = _uiState.value.copy(vpnState = state)
+            }
+            .launchIn(viewModelScope)
+    }
+
     fun refresh() {
         viewModelScope.launch {
             val runtime = vpnController.runtimeStatus()
@@ -61,7 +82,7 @@ class HomeViewModel(
                     runtimeStatus = runtime.message,
                     runtimeBinaryPath = runtime.binaryPath,
                     runtimeLogPath = runtime.logPath,
-                    latestLogLine = vpnController.latestLogs()?.lineSequence()?.lastOrNull(),
+                    latestLogLine = vpnController.latestLogLine(),
                     error = null,
                     needsLogin = false
                 )
@@ -80,7 +101,7 @@ class HomeViewModel(
                     runtimeStatus = runtime.message,
                     runtimeBinaryPath = runtime.binaryPath,
                     runtimeLogPath = runtime.logPath,
-                    latestLogLine = vpnController.latestLogs()?.lineSequence()?.lastOrNull()
+                    latestLogLine = vpnController.latestLogLine()
                 )
             }
         }
@@ -102,6 +123,20 @@ class HomeViewModel(
                     val result = vpnController.connectSelectedNode()
                     if (result.isFailure) {
                         _uiState.value = _uiState.value.copy(error = result.exceptionOrNull()?.message)
+                    } else {
+                        repeat(8) {
+                            delay(500)
+                            vpnController.syncStateFromLogs()
+                            val runtime = vpnController.runtimeStatus()
+                            _uiState.value = _uiState.value.copy(
+                                vpnState = vpnController.state.value,
+                                runtimeStatus = runtime.message,
+                                runtimeBinaryPath = runtime.binaryPath,
+                                runtimeLogPath = runtime.logPath,
+                                latestLogLine = vpnController.latestLogLine()
+                            )
+                            if (vpnController.state.value == VpnConnectionState.CONNECTED || vpnController.state.value == VpnConnectionState.ERROR) return@repeat
+                        }
                     }
                 }
             }
@@ -112,7 +147,7 @@ class HomeViewModel(
                 runtimeStatus = runtime.message,
                 runtimeBinaryPath = runtime.binaryPath,
                 runtimeLogPath = runtime.logPath,
-                latestLogLine = vpnController.latestLogs()?.lineSequence()?.lastOrNull()
+                latestLogLine = vpnController.latestLogLine()
             )
         }
     }
@@ -127,7 +162,10 @@ class HomeViewModel(
     fun tryAutoReconnect() {
         viewModelScope.launch {
             vpnController.tryAutoReconnect()
-            _uiState.value = _uiState.value.copy(vpnState = vpnController.state.value)
+            _uiState.value = _uiState.value.copy(
+                vpnState = vpnController.state.value,
+                latestLogLine = vpnController.latestLogLine()
+            )
         }
     }
 }

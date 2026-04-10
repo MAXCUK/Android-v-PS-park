@@ -34,7 +34,8 @@ class NodeDetailViewModel(
     fun select(nodeId: String) {
         viewModelScope.launch {
             nodeRepository.selectNode(nodeId)
-            _uiState.value = _uiState.value.copy(message = "已设为当前节点")
+            val selected = nodeRepository.currentSelectedNode()
+            _uiState.value = _uiState.value.copy(node = selected, message = "已设为当前节点")
         }
     }
 }

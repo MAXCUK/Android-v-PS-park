@@ -63,10 +63,18 @@ class VpnController(
 
     fun syncStateFromLogs() {
         val logs = latestLogs().orEmpty()
+        val latestLine = logs.lineSequence().filter { it.isNotBlank() }.lastOrNull().orEmpty()
         _state.value = when {
-            logs.contains("tun established") || logs.contains("libbox service started") -> VpnConnectionState.CONNECTED
-            logs.contains("failed", ignoreCase = true) || logs.contains("失败") -> VpnConnectionState.ERROR
-            logs.contains("prepare runtime") || logs.contains("newService") || logs.contains("openTun") -> VpnConnectionState.PREPARING
+            logs.contains("tun established") -> VpnConnectionState.CONNECTED
+            latestLine.contains("service start failed", ignoreCase = true) ||
+                latestLine.contains("vpn start failed", ignoreCase = true) ||
+                latestLine.contains("failed", ignoreCase = true) ||
+                latestLine.contains("error", ignoreCase = true) ||
+                latestLine.contains("失败") -> VpnConnectionState.ERROR
+            logs.contains("prepare runtime") ||
+                logs.contains("newService") ||
+                logs.contains("service started") ||
+                logs.contains("openTun") -> VpnConnectionState.PREPARING
             else -> _state.value
         }
     }
@@ -88,4 +96,6 @@ class VpnController(
         proxyRuntimeManager.stop()
         _state.value = VpnConnectionState.STOPPED
     }
+
+    fun latestLogLine(): String? = latestLogs()?.lineSequence()?.filter { it.isNotBlank() }?.lastOrNull()
 }

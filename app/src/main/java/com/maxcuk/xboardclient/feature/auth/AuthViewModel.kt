@@ -9,6 +9,7 @@ import com.maxcuk.xboardclient.core.repository.NodeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class AuthUiState(
@@ -71,6 +72,8 @@ class AuthViewModel(
                     val servers = remote.fetchServers(token)
                     check(servers.isNotEmpty()) { "官方面板返回 0 个节点" }
                     nodeRepository.replaceNodes(servers)
+                    val storedNodes = nodeRepository.observeNodes().first()
+                    check(storedNodes.isNotEmpty()) { "登录成功，但节点同步后仍为 0 个：接口返回 ${servers.size} 个，但没有任何节点成功入库" }
                     refreshScheduler(true)
                 }.onFailure {
                     _uiState.value = _uiState.value.copy(error = "登录成功，但节点同步失败：${it.message ?: "未知错误"}")

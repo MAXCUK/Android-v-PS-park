@@ -37,11 +37,13 @@ class XBoardVpnService : VpnService() {
                 }
                 val started = boxRunner.start(configPath)
                 if (!started) {
+                    currentStatusLine = "启动失败"
+                    notifyConnectedState()
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
                     return START_NOT_STICKY
                 }
-                currentStatusLine = "已连接"
+                currentStatusLine = "正在建立隧道"
                 notifyConnectedState()
             }
             ACTION_DISCONNECT -> {
