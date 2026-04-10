@@ -2,6 +2,7 @@ package com.maxcuk.xboardclient.core.proxy
 
 import com.google.gson.GsonBuilder
 import com.maxcuk.xboardclient.core.database.entity.NodeEntity
+import com.maxcuk.xboardclient.core.repository.rawFields
 
 object SingBoxConfigBuilder {
     private val gson = GsonBuilder().setPrettyPrinting().create()
@@ -29,14 +30,8 @@ object SingBoxConfigBuilder {
             ),
             "outbounds" to listOf(
                 outbound,
-                mapOf(
-                    "type" to "direct",
-                    "tag" to "direct"
-                ),
-                mapOf(
-                    "type" to "block",
-                    "tag" to "block"
-                )
+                mapOf("type" to "direct", "tag" to "direct"),
+                mapOf("type" to "block", "tag" to "block")
             ),
             "route" to mapOf(
                 "auto_detect_interface" to true,
@@ -48,18 +43,19 @@ object SingBoxConfigBuilder {
     }
 
     private fun buildVlessOutbound(node: NodeEntity): Map<String, Any?> {
-        val tlsEnabled = node.security.equals("tls", true) || !node.sni.isNullOrBlank() || !node.publicKey.isNullOrBlank()
-        val transport = when (node.network?.lowercase()) {
+        val raw = node.rawFields()
+        val tlsEnabled = raw.security.equals("tls", true) || !raw.sni.isNullOrBlank() || !raw.publicKey.isNullOrBlank()
+        val transport = when (raw.network?.lowercase()) {
             "ws", "websocket" -> mapOf(
                 "type" to "ws",
-                "path" to (node.path ?: "/"),
+                "path" to (raw.path ?: "/"),
                 "headers" to mapOf(
-                    "Host" to (node.hostHeader ?: node.sni ?: node.host)
+                    "Host" to (raw.hostHeader ?: raw.sni ?: raw.host)
                 )
             )
             "grpc" -> mapOf(
                 "type" to "grpc",
-                "service_name" to (node.serviceName ?: "grpc")
+                "service_name" to (raw.serviceName ?: "grpc")
             )
             else -> null
         }
@@ -67,14 +63,14 @@ object SingBoxConfigBuilder {
         val tls = if (tlsEnabled) {
             buildMap<String, Any?> {
                 put("enabled", true)
-                put("server_name", node.sni ?: node.host)
+                put("server_name", raw.sni ?: raw.host)
                 put("insecure", false)
-                if (!node.publicKey.isNullOrBlank()) {
+                if (!raw.publicKey.isNullOrBlank()) {
                     put("reality", mapOf(
                         "enabled" to true,
-                        "public_key" to node.publicKey,
-                        "short_id" to (node.shortId ?: ""),
-                        "spider_x" to (node.spiderX ?: "/")
+                        "public_key" to raw.publicKey,
+                        "short_id" to (raw.shortId ?: ""),
+                        "spider_x" to (raw.spiderX ?: "/")
                     ))
                 }
                 if (!node.alpnValue().isNullOrBlank()) {
@@ -86,10 +82,10 @@ object SingBoxConfigBuilder {
         return buildMap {
             put("type", "vless")
             put("tag", "proxy")
-            put("server", node.host)
-            put("server_port", node.port)
-            put("uuid", node.uuid ?: "")
-            put("flow", node.flow ?: "")
+            put("server", raw.host ?: node.host)
+            put("server_port", raw.port ?: node.port)
+            put("uuid", raw.uuid ?: node.uuid ?: "")
+            put("flow", raw.flow ?: node.flow ?: "")
             put("packet_encoding", "xudp")
             if (tls != null) put("tls", tls)
             if (transport != null) put("transport", transport)
@@ -97,16 +93,17 @@ object SingBoxConfigBuilder {
     }
 
     private fun buildShadowsocksOutbound(node: NodeEntity): Map<String, Any?> {
+        val raw = node.rawFields()
         return mapOf(
             "type" to "shadowsocks",
             "tag" to "proxy",
-            "server" to node.host,
-            "server_port" to node.port,
-            "method" to (node.method ?: "aes-128-gcm"),
-            "password" to (node.password ?: "")
+            "server" to (raw.host ?: node.host),
+            "server_port" to (raw.port ?: node.port),
+            "method" to (raw.method ?: node.method ?: "aes-128-gcm"),
+            "password" to (raw.password ?: node.password ?: "")
         )
     }
 
     private fun NodeEntity.alpnValue(): String? = rawJson
-        .let { json -> Regex("\"alpn\"\\s*:\\s*\"([^\"]+)\"").find(json)?.groupValues?.getOrNull(1) }
+        .let { json -> Regex("\\\"alpn\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"").find(json)?.groupValues?.getOrNull(1) }
 }
