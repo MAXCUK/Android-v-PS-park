@@ -56,7 +56,7 @@ class XBoardVpnService : VpnService() {
             manager.createNotificationChannel(
                 NotificationChannel(
                     CHANNEL_ID,
-                    "XBoard VPN",
+                    "星隧互联 VPN",
                     NotificationManager.IMPORTANCE_LOW
                 )
             )
@@ -71,7 +71,7 @@ class XBoardVpnService : VpnService() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_sys_download_done)
-            .setContentTitle("XBoard Client")
+            .setContentTitle("星隧互联")
             .setContentText(text)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -79,10 +79,10 @@ class XBoardVpnService : VpnService() {
     }
 
     companion object {
-        const val ACTION_CONNECT = "com.maxcuk.xboardclient.action.CONNECT"
-        const val ACTION_DISCONNECT = "com.maxcuk.xboardclient.action.DISCONNECT"
-        const val EXTRA_CONFIG_PATH = "com.maxcuk.xboardclient.extra.CONFIG_PATH"
-        private const val CHANNEL_ID = "xboard_vpn"
+        const val ACTION_CONNECT = "com.xingsuihulian.app.action.CONNECT"
+        const val ACTION_DISCONNECT = "com.xingsuihulian.app.action.DISCONNECT"
+        const val EXTRA_CONFIG_PATH = "com.xingsuihulian.app.extra.CONFIG_PATH"
+        private const val CHANNEL_ID = "xingsuihulian_vpn"
         private const val NOTIFICATION_ID = 1001
     }
 }

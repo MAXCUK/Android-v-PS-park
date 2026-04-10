@@ -18,11 +18,22 @@ fun readSecret(key: String): String? =
         ?: System.getenv(key.uppercase())
 
 android {
-    namespace = "com.maxcuk.xboardclient"
+    namespace = "com.xingsuihulian.app"
     compileSdk = 34
 
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                storeFile = file(readSecret("storeFile")!!)
+                storePassword = readSecret("storePassword")
+                keyAlias = readSecret("keyAlias")
+                keyPassword = readSecret("keyPassword")
+            }
+        }
+    }
+
     defaultConfig {
-        applicationId = "com.maxcuk.xboardclient"
+        applicationId = "com.xingsuihulian.app"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -35,7 +46,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            if (signingConfigs.findByName("release") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
         release {
+            if (signingConfigs.findByName("release") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">XBoard Client</string>
+    <string name="app_name">星隧互联</string>
 
     <string name="menu_xboard_sync">登录同步</string>
 
