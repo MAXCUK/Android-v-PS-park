@@ -26,7 +26,8 @@ data class HomeUiState(
     val runtimeBinaryPath: String = "",
     val runtimeLogPath: String = "",
     val latestLogLine: String? = null,
-    val error: String? = null
+    val error: String? = null,
+    val needsLogin: Boolean = false
 )
 
 class HomeViewModel(
@@ -41,7 +42,7 @@ class HomeViewModel(
         viewModelScope.launch {
             val runtime = vpnController.runtimeStatus()
             runCatching {
-                _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+                _uiState.value = _uiState.value.copy(isLoading = true, error = null, needsLogin = false)
                 val session = authRepository.currentSession() ?: error("未登录")
                 val remote = XBoardRemoteDataSource(NetworkFactory.create(session.baseUrl), session.baseUrl)
                 val userInfo = remote.getUserInfo(session.authToken)
@@ -60,12 +61,16 @@ class HomeViewModel(
                     runtimeStatus = runtime.message,
                     runtimeBinaryPath = runtime.binaryPath,
                     runtimeLogPath = runtime.logPath,
-                    latestLogLine = vpnController.latestLogs()?.lineSequence()?.lastOrNull()
+                    latestLogLine = vpnController.latestLogs()?.lineSequence()?.lastOrNull(),
+                    error = null,
+                    needsLogin = false
                 )
             }.onFailure {
+                val message = it.message ?: "加载失败"
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = it.message ?: "加载失败",
+                    error = if (message == "未登录") "当前登录态已失效，请重新登录同步" else message,
+                    needsLogin = message == "未登录",
                     runtimeStatus = runtime.message,
                     runtimeBinaryPath = runtime.binaryPath,
                     runtimeLogPath = runtime.logPath,

@@ -28,7 +28,8 @@ fun HomeScreen(
     onOpenNodes: () -> Unit,
     onOpenProfile: () -> Unit,
     onOpenLogs: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onOpenLogin: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -50,6 +51,10 @@ fun HomeScreen(
                 viewModel.connectOrDisconnect()
             }
         }
+    }
+
+    LaunchedEffect(uiState.needsLogin) {
+        if (uiState.needsLogin) onOpenLogin()
     }
 
     Column(

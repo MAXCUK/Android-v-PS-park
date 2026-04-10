@@ -57,7 +57,12 @@ fun XBoardNavHost(navController: NavHostController, container: AppContainer) {
                 onOpenNodes = { navController.navigate(Routes.NODES) },
                 onOpenProfile = { navController.navigate(Routes.PROFILE) },
                 onOpenLogs = { navController.navigate(Routes.LOGS) },
-                onOpenSettings = { navController.navigate(Routes.SETTINGS) }
+                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                onOpenLogin = {
+                    navController.navigate(Routes.AUTH) {
+                        popUpTo(Routes.HOME) { inclusive = true }
+                    }
+                }
             )
         }
         composable(Routes.NODES) {
