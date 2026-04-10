@@ -6,20 +6,38 @@ import com.maxcuk.xboardclient.core.network.model.SubscriptionInfoResponse
 import com.maxcuk.xboardclient.core.network.model.UserInfoResponse
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 
 class XBoardRemoteDataSource(
     private val api: XBoardApiService,
     private val baseUrl: String,
-    private val rawHttpClient: OkHttpClient = OkHttpClient()
+    private val rawHttpClient: OkHttpClient = NetworkFactory.createHttpClient()
 ) {
     suspend fun fetchGuestConfig(): GuestConfigResponse? {
         return api.getGuestConfig().body()?.data
     }
 
     suspend fun login(email: String, password: String): String {
-        val body = api.login(com.maxcuk.xboardclient.core.network.model.LoginRequest(email, password)).body()
-        val token = body?.data?.authData ?: body?.data?.token
-        return token ?: error(body?.message ?: "登录失败：未拿到 token")
+        val payload = JSONObject().apply {
+            put("email", email)
+            put("password", password)
+        }.toString().toRequestBody(NetworkFactory.jsonMediaType)
+
+        val response = api.login(payload)
+        val body = response.body()
+        val token = body?.data?.authData?.takeIf { it.isNotBlank() }
+            ?: body?.data?.token?.takeIf { it.isNotBlank() }
+
+        if (response.isSuccessful && token != null) return token
+
+        val detail = buildList {
+            body?.message?.takeIf { it.isNotBlank() }?.let(::add)
+            body?.error?.takeIf { it.isNotBlank() }?.let(::add)
+            response.message().takeIf { it.isNotBlank() }?.let(::add)
+        }.joinToString(" | ")
+
+        error(detail.ifBlank { "登录失败：未拿到 token" })
     }
 
     suspend fun getUserInfo(token: String): UserInfoResponse {
@@ -29,7 +47,7 @@ class XBoardRemoteDataSource(
             val response = api.getUserInfo(header)
             val data = response.body()?.data
             if (response.isSuccessful && data != null) return data
-            lastError = response.body()?.message ?: response.message()
+            lastError = response.body()?.message ?: response.body()?.error ?: response.message()
         }
         error(lastError ?: "获取用户信息失败")
     }
@@ -41,7 +59,7 @@ class XBoardRemoteDataSource(
             val response = api.getSubscribe(header)
             val data = response.body()?.data
             if (response.isSuccessful && data != null) return data
-            lastError = response.body()?.message ?: response.message()
+            lastError = response.body()?.message ?: response.body()?.error ?: response.message()
         }
         error(lastError ?: "获取订阅信息失败")
     }
@@ -74,7 +92,7 @@ class XBoardRemoteDataSource(
             val response = api.fetchServers(header)
             val data = response.body()?.data
             if (response.isSuccessful && data != null) return data
-            lastError = response.body()?.message ?: response.message()
+            lastError = response.body()?.message ?: response.body()?.error ?: response.message()
         }
         if (lastError != null) throw IllegalStateException(lastError)
         return emptyList()

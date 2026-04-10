@@ -19,6 +19,12 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: libcore/go.sum
+
       - name: Setup Gradle 8.6
         uses: gradle/actions/setup-gradle@v3
         with:
@@ -42,10 +48,21 @@ jobs:
         shell: bash
         run: |
           yes | sdkmanager --licenses || true
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;25.0.8775105"
 
       - name: Grant execute permission
-        run: chmod +x scripts/check-project.sh scripts/build-debug.sh
+        run: chmod +x gradlew run scripts/check-project.sh scripts/build-debug.sh
+
+      - name: Prepare sing-box assets
+        run: bash buildScript/lib/assets.sh
+
+      - name: Build libcore AAR
+        run: ./run lib core
+
+      - name: Verify libcore artifact
+        run: |
+          test -f app/libs/libcore.aar
+          ls -lh app/libs/libcore.aar
 
       - name: Project check
         run: ./scripts/check-project.sh

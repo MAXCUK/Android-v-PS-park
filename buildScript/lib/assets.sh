@@ -2,7 +2,7 @@
 
 set -e
 
-DIR=app/src/main/assets/sing-box
+DIR=app/src/main/assets/singbox
 rm -rf $DIR
 mkdir -p $DIR
 cd $DIR

@@ -3,10 +3,10 @@ package com.maxcuk.xboardclient.core.network
 import com.maxcuk.xboardclient.core.network.model.ApiResponse
 import com.maxcuk.xboardclient.core.network.model.AuthData
 import com.maxcuk.xboardclient.core.network.model.GuestConfigResponse
-import com.maxcuk.xboardclient.core.network.model.LoginRequest
 import com.maxcuk.xboardclient.core.network.model.ServerRouteResponse
 import com.maxcuk.xboardclient.core.network.model.SubscriptionInfoResponse
 import com.maxcuk.xboardclient.core.network.model.UserInfoResponse
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -21,7 +21,7 @@ interface XBoardApiService {
 
     @POST("api/v1/passport/auth/login")
     suspend fun login(
-        @Body request: LoginRequest
+        @Body request: RequestBody
     ): Response<ApiResponse<AuthData>>
 
     @GET("api/v1/user/info")
