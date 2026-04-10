@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:name=".app.XBoardClientApplication"
+        android:name="com.maxcuk.xboardclient.app.XBoardClientApplication"
         android:allowBackup="true"
         android:icon="@android:drawable/sym_def_app_icon"
         android:label="@string/app_name"
@@ -15,7 +15,7 @@
         android:theme="@style/Theme.XBoardClient">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.maxcuk.xboardclient.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
