@@ -69,6 +69,7 @@ class AuthViewModel(
                 authRepository.saveSession(normalizedBaseUrl, email, token)
                 runCatching {
                     val servers = remote.fetchServers(token)
+                    check(servers.isNotEmpty()) { "官方面板返回 0 个节点" }
                     nodeRepository.replaceNodes(servers)
                     refreshScheduler(true)
                 }.onFailure {
