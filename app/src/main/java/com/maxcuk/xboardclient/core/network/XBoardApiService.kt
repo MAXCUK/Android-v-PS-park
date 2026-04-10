@@ -1,7 +1,6 @@
 package com.maxcuk.xboardclient.core.network
 
 import com.maxcuk.xboardclient.core.network.model.ApiResponse
-import com.maxcuk.xboardclient.core.network.model.AuthData
 import com.maxcuk.xboardclient.core.network.model.GuestConfigResponse
 import com.maxcuk.xboardclient.core.network.model.ServerRouteResponse
 import com.maxcuk.xboardclient.core.network.model.SubscriptionInfoResponse
@@ -22,7 +21,7 @@ interface XBoardApiService {
     @POST("api/v1/passport/auth/login")
     suspend fun login(
         @Body request: RequestBody
-    ): Response<ApiResponse<AuthData>>
+    ): Response<ResponseBody>
 
     @GET("api/v1/user/info")
     suspend fun getUserInfo(

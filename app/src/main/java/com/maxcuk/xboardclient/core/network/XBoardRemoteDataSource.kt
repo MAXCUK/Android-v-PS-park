@@ -25,16 +25,18 @@ class XBoardRemoteDataSource(
         }.toString().toRequestBody(NetworkFactory.jsonMediaType)
 
         val response = api.login(payload)
-        val body = response.body()
-        val token = body?.data?.authData?.takeIf { it.isNotBlank() }
-            ?: body?.data?.token?.takeIf { it.isNotBlank() }
+        val raw = response.body()?.string().orEmpty()
+        val json = runCatching { JSONObject(raw) }.getOrNull()
 
-        if (response.isSuccessful && token != null) return token
+        val token = extractLoginToken(json)
+        if (response.isSuccessful && !token.isNullOrBlank()) return token
 
         val detail = buildList {
-            body?.message?.takeIf { it.isNotBlank() }?.let(::add)
-            body?.error?.takeIf { it.isNotBlank() }?.let(::add)
+            json?.optString("message")?.takeIf { it.isNotBlank() }?.let(::add)
+            json?.optString("error")?.takeIf { it.isNotBlank() }?.let(::add)
+            json?.optJSONObject("data")?.optString("message")?.takeIf { it.isNotBlank() }?.let(::add)
             response.message().takeIf { it.isNotBlank() }?.let(::add)
+            if (raw.isNotBlank()) add("raw=$raw")
         }.joinToString(" | ")
 
         error(detail.ifBlank { "登录失败：未拿到 token" })
@@ -117,6 +119,25 @@ class XBoardRemoteDataSource(
             if (parsed.isNotEmpty()) return parsed
         }
         return emptyList()
+    }
+
+    private fun extractLoginToken(json: JSONObject?): String? {
+        if (json == null) return null
+
+        json.optString("auth_data").takeIf { it.isNotBlank() }?.let { return it }
+        json.optString("token").takeIf { it.isNotBlank() }?.let { return it }
+
+        val data = json.opt("data")
+        when (data) {
+            is JSONObject -> {
+                data.optString("auth_data").takeIf { it.isNotBlank() }?.let { return it }
+                data.optString("token").takeIf { it.isNotBlank() }?.let { return it }
+                data.optString("access_token").takeIf { it.isNotBlank() }?.let { return it }
+            }
+            is String -> if (data.isNotBlank()) return data
+        }
+
+        return null
     }
 
     private fun authHeaderCandidates(token: String): List<String> =
