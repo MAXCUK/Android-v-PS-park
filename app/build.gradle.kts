@@ -24,7 +24,7 @@ android {
     signingConfigs {
         if (keystorePropertiesFile.exists()) {
             create("release") {
-                storeFile = file(readSecret("storeFile")!!)
+                storeFile = rootProject.file(readSecret("storeFile")!!)
                 storePassword = readSecret("storePassword")
                 keyAlias = readSecret("keyAlias")
                 keyPassword = readSecret("keyPassword")
