@@ -32,18 +32,22 @@ fun NodesScreen(
     ) {
         Text(text = "节点列表")
         Text(text = "返回", modifier = Modifier.clickable { onBack() })
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            items(uiState.nodes) { node ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onOpenNode(node.id) }
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = node.name)
-                        Text(text = "协议：${node.type}")
-                        Text(text = "地址：${node.host}:${node.port}")
-                        Text(text = if (node.isSelected) "已选中" else "点击查看详情")
+        if (uiState.nodes.isEmpty()) {
+            Text(text = "暂无节点，请先登录同步或下拉刷新后再试")
+        } else {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                items(uiState.nodes) { node ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onOpenNode(node.id) }
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(text = node.name)
+                            Text(text = "协议：${node.type}")
+                            Text(text = "地址：${node.host}:${node.port}")
+                            Text(text = if (node.isSelected) "已选中" else "点击查看详情")
+                        }
                     }
                 }
             }

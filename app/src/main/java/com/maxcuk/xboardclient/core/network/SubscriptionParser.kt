@@ -13,6 +13,8 @@ object SubscriptionParser {
             .map { it.trim() }
             .filter { it.isNotBlank() }
             .mapIndexedNotNull { index, line -> parseLine(index, line) }
+            .filterNot { shouldIgnoreNodeName(it.remarks ?: it.name.orEmpty()) }
+            .filter { !it.address.isNullOrBlank() && (it.port ?: 0) > 0 }
             .toList()
     }
 
@@ -39,22 +41,20 @@ object SubscriptionParser {
         val name = decodeComponent(raw.substringAfter("#", "SS-$index")).ifBlank { "SS-$index" }
 
         val userAndHost = if (mainPart.contains("@")) {
-            mainPart
+            mainPart.substringBefore("?")
         } else {
             val decoded = decodeBase64Segment(mainPart.substringBefore("?")) ?: return null
-            val suffix = mainPart.substringAfter("?", "").let { if (it.isBlank()) "" else "?$it" }
-            decoded + suffix
+            decoded
         }
 
         val credentials = userAndHost.substringBefore("@")
-        val hostPart = userAndHost.substringAfter("@", "")
+        val hostPortPart = userAndHost.substringAfter("@", "")
         val methodPassword = if (credentials.contains(":")) credentials else decodeBase64Segment(credentials).orEmpty()
         val method = methodPassword.substringBefore(":", "")
         val password = methodPassword.substringAfter(":", "")
-        val host = hostPart.substringBefore(":").substringBefore("?")
-        val port = hostPart.substringAfter(":", "0").substringBefore("?").toIntOrNull() ?: 0
+        val (host, port) = parseHostAndPort(hostPortPart)
 
-        if (host.isBlank() || method.isBlank()) return null
+        if (host.isBlank() || method.isBlank() || port <= 0) return null
         return ServerRouteResponse(
             id = index.toLong(),
             remarks = name,
@@ -71,13 +71,14 @@ object SubscriptionParser {
         val uri = Uri.parse(line)
         val host = uri.host ?: return null
         val name = decodeComponent(uri.fragment ?: "VLESS-$index").ifBlank { "VLESS-$index" }
+        val port = uri.port.takeIf { it > 0 } ?: return null
         return ServerRouteResponse(
             id = index.toLong(),
             remarks = name,
             type = "vless",
             server = host,
             address = host,
-            port = uri.port.takeIf { it > 0 },
+            port = port,
             uuid = uri.userInfo,
             security = uri.getQueryParameter("security") ?: if (line.contains("security=tls")) "tls" else null,
             sni = uri.getQueryParameter("sni"),
@@ -88,6 +89,26 @@ object SubscriptionParser {
             public_key = uri.getQueryParameter("pbk"),
             short_id = uri.getQueryParameter("sid")
         )
+    }
+
+    private fun parseHostAndPort(value: String): Pair<String, Int> {
+        val cleaned = value.trim()
+        if (cleaned.startsWith("[")) {
+            val end = cleaned.indexOf(']')
+            if (end <= 0) return "" to 0
+            val host = cleaned.substring(1, end)
+            val port = cleaned.substring(end + 1).removePrefix(":").substringBefore("?").toIntOrNull() ?: 0
+            return host to port
+        }
+        val host = cleaned.substringBeforeLast(":").substringBefore("?")
+        val port = cleaned.substringAfterLast(":", "0").substringBefore("?").toIntOrNull() ?: 0
+        return host to port
+    }
+
+    private fun shouldIgnoreNodeName(name: String): Boolean {
+        val text = name.lowercase()
+        return listOf("剩余流量", "到期", "更新订阅", "重置", "套餐").any { it in name } ||
+            listOf("traffic", "expire", "subscription", "reset", "plan").any { it in text }
     }
 
     private fun decodeBase64Segment(value: String): String? {
