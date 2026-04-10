@@ -25,12 +25,12 @@ fun AuthScreen(
     defaultBaseUrl: String,
     onLoginClick: () -> Unit
 ) {
-    var baseUrl by remember { mutableStateOf(defaultBaseUrl) }
+    val baseUrl = defaultBaseUrl
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(baseUrl) {
+    LaunchedEffect(Unit) {
         if (baseUrl.isNotBlank()) viewModel.preloadSite(baseUrl)
     }
 
@@ -45,12 +45,6 @@ fun AuthScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(text = uiState.siteName ?: "登录 XBoard")
-        OutlinedTextField(
-            value = baseUrl,
-            onValueChange = { baseUrl = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("面板地址") }
-        )
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -67,7 +61,7 @@ fun AuthScreen(
         Button(
             onClick = { viewModel.login(baseUrl, email, password, onLoginClick) },
             modifier = Modifier.fillMaxWidth(),
-            enabled = baseUrl.isNotBlank() && email.isNotBlank() && password.isNotBlank() && !uiState.isLoading
+            enabled = email.isNotBlank() && password.isNotBlank() && !uiState.isLoading
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator()

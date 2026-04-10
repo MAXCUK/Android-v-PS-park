@@ -26,7 +26,6 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(text = "账户信息")
-        Text(text = "面板：${uiState.session?.baseUrl ?: "--"}")
         Text(text = "邮箱：${uiState.session?.email ?: "--"}")
         Text(text = "Token：${uiState.session?.authToken?.take(24) ?: "--"}...")
         Text(text = "返回", modifier = Modifier.clickable { onBack() })
