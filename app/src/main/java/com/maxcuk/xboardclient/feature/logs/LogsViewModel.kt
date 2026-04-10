@@ -17,6 +17,15 @@ class LogsViewModel(
     val uiState: StateFlow<LogsUiState> = _uiState.asStateFlow()
 
     fun refresh() {
-        _uiState.value = LogsUiState(vpnController.latestLogs() ?: "暂无日志")
+        val runtime = vpnController.runtimeStatus()
+        val diagnostic = buildString {
+            appendLine("运行时状态：${runtime.message}")
+            appendLine("运行库路径：${runtime.binaryPath.ifBlank { "--" }}")
+            appendLine("配置文件：${runtime.configPath}")
+            appendLine("日志文件：${runtime.logPath}")
+            appendLine()
+            append(vpnController.latestLogs() ?: "暂无运行日志")
+        }
+        _uiState.value = LogsUiState(diagnostic)
     }
 }

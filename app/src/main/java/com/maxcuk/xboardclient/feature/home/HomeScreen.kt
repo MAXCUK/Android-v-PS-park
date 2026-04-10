@@ -21,6 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.maxcuk.xboardclient.core.vpn.VpnPermissionHelper
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
@@ -57,6 +60,13 @@ fun HomeScreen(
         if (uiState.needsLogin) onOpenLogin()
     }
 
+    val statusText = when (uiState.vpnState.name) {
+        "CONNECTED" -> "已连接"
+        "PREPARING" -> "连接中"
+        "ERROR" -> "连接异常"
+        else -> "未连接"
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -64,19 +74,18 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("连接状态：${uiState.vpnState}")
-                Text("当前节点：${uiState.selectedNodeName ?: "未选择"}")
-                Text("邮箱：${uiState.userInfo?.email ?: "--"}")
-                Text("流量上限：${uiState.userInfo?.transfer_enable ?: 0}")
-                Text("已用上行：${uiState.userInfo?.u ?: 0}")
-                Text("已用下行：${uiState.userInfo?.d ?: 0}")
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text("连接状态：$statusText")
+                Text("当前节点：${uiState.selectedNodeName ?: if (uiState.nodeCount > 0) "请选择节点" else "暂无节点"}")
+                Text("账号邮箱：${uiState.userInfo?.email ?: "--"}")
                 Text("节点数量：${uiState.nodeCount}")
-                Text("运行时：${uiState.runtimeStatus}")
-                Text("最新错误：${uiState.error ?: "--"}")
-                Text("运行库：${uiState.runtimeBinaryPath}")
-                Text("日志文件：${uiState.runtimeLogPath}")
-                Text("最新日志：${uiState.latestLogLine ?: "--"}")
+                Text("套餐流量：${formatBytes(uiState.userInfo?.transfer_enable)}")
+                Text("已用上行：${formatBytes(uiState.userInfo?.u)}")
+                Text("已用下行：${formatBytes(uiState.userInfo?.d)}")
+                Text("到期时间：${formatExpiry(uiState.userInfo?.expired_at)}")
+                uiState.error?.takeIf { it.isNotBlank() }?.let {
+                    Text("提示：$it")
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -89,7 +98,9 @@ fun HomeScreen(
                 }, modifier = Modifier.fillMaxWidth()) {
                     Text(if (uiState.vpnState.name == "CONNECTED") "断开连接" else "一键连接")
                 }
-                Button(onClick = { viewModel.refresh() }, modifier = Modifier.fillMaxWidth()) { Text("从面板刷新") }
+                Button(onClick = { viewModel.refresh() }, modifier = Modifier.fillMaxWidth()) {
+                    Text(if (uiState.userInfo == null) "重新登录/刷新" else "从面板刷新")
+                }
             }
         }
 
@@ -100,4 +111,24 @@ fun HomeScreen(
             Button(onClick = onOpenSettings, modifier = Modifier.fillMaxWidth()) { Text("设置") }
         }
     }
+}
+
+private fun formatBytes(value: Long?): String {
+    if (value == null || value <= 0) return "0 B"
+    val units = listOf("B", "KB", "MB", "GB", "TB")
+    var size = value.toDouble()
+    var index = 0
+    while (size >= 1024 && index < units.lastIndex) {
+        size /= 1024
+        index++
+    }
+    return String.format(Locale.US, "%.2f %s", size, units[index])
+}
+
+private fun formatExpiry(value: Long?): String {
+    if (value == null || value <= 0) return "--"
+    val millis = if (value < 10_000_000_000L) value * 1000 else value
+    return runCatching {
+        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(millis))
+    }.getOrDefault("--")
 }
