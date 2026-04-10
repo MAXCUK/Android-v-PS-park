@@ -24,6 +24,15 @@ class VpnController(
         return runCatching {
             _state.value = VpnConnectionState.PREPARING
             val node = nodeRepository.currentSelectedNode() ?: error("请先选择节点")
+            if (node.host.isBlank() || node.port <= 0) error("当前节点缺少有效地址或端口")
+            when (node.type) {
+                "shadowsocks" -> {
+                    if (node.method.isNullOrBlank() || node.password.isNullOrBlank()) error("当前节点缺少 shadowsocks 必要参数")
+                }
+                "vless" -> {
+                    if (node.uuid.isNullOrBlank()) error("当前节点缺少 VLESS 必要参数")
+                }
+            }
             val configFile = proxyRuntimeManager.prepare(node)
             check(proxyRuntimeManager.runtimeInstalled()) { proxyRuntimeManager.runtimeStatus().message }
             val intent = Intent(context, XBoardVpnService::class.java).apply {
@@ -37,7 +46,8 @@ class VpnController(
                 context.startService(intent)
             }
             connectionPrefs.setLastConnected(true)
-            _state.value = VpnConnectionState.CONNECTED
+            // Keep PREPARING until service/tun logs prove success; avoid fake CONNECTED UI.
+            _state.value = VpnConnectionState.PREPARING
         }.onFailure {
             connectionPrefs.setLastConnected(false)
             _state.value = VpnConnectionState.ERROR
@@ -51,12 +61,20 @@ class VpnController(
         return connectSelectedNode()
     }
 
+    fun syncStateFromLogs() {
+        val logs = latestLogs().orEmpty()
+        _state.value = when {
+            logs.contains("tun established") || logs.contains("libbox service started") -> VpnConnectionState.CONNECTED
+            logs.contains("failed", ignoreCase = true) || logs.contains("失败") -> VpnConnectionState.ERROR
+            logs.contains("prepare runtime") || logs.contains("newService") || logs.contains("openTun") -> VpnConnectionState.PREPARING
+            else -> _state.value
+        }
+    }
+
     suspend fun refreshSelectedNodeName(): String? = nodeRepository.currentSelectedNode()?.name
 
     fun runtimeInfo(): String = proxyRuntimeManager.runtimeInfo()
-
     fun runtimeStatus(): RuntimeStatus = proxyRuntimeManager.runtimeStatus()
-
     fun latestLogs(): String? = proxyRuntimeManager.latestLogs()
 
     suspend fun setAutoReconnect(enabled: Boolean) {

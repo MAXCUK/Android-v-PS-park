@@ -105,6 +105,7 @@ class HomeViewModel(
                     }
                 }
             }
+            vpnController.syncStateFromLogs()
             val runtime = vpnController.runtimeStatus()
             _uiState.value = _uiState.value.copy(
                 vpnState = vpnController.state.value,
