@@ -68,11 +68,15 @@ class HomeViewModel(
             }.onSuccess {
                 _uiState.value = it
             }.onFailure {
-                val message = it.message ?: "加载失败"
+                val message = (it.message ?: "加载失败").ifBlank { "加载失败" }
+                val needsRelogin = message == "未登录" || message.contains("重新登录") || message.contains("401") || message.contains("403") || message.contains("邮箱或密码错误")
+                if (needsRelogin) {
+                    viewModelScope.launch { authRepository.clearSession() }
+                }
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = if (message == "未登录") "当前登录态已失效，请重新登录同步" else message,
-                    needsLogin = message == "未登录",
+                    error = if (needsRelogin) "登录态已失效，请重新登录" else message,
+                    needsLogin = needsRelogin,
                     runtimeStatus = runtime.message,
                     runtimeBinaryPath = runtime.binaryPath,
                     runtimeLogPath = runtime.logPath,

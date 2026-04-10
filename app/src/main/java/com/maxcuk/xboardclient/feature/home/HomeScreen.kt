@@ -98,8 +98,10 @@ fun HomeScreen(
                 }, modifier = Modifier.fillMaxWidth()) {
                     Text(if (uiState.vpnState.name == "CONNECTED") "断开连接" else "一键连接")
                 }
-                Button(onClick = { viewModel.refresh() }, modifier = Modifier.fillMaxWidth()) {
-                    Text(if (uiState.userInfo == null) "重新登录/刷新" else "从面板刷新")
+                Button(onClick = {
+                    if (uiState.userInfo == null) onOpenLogin() else viewModel.refresh()
+                }, modifier = Modifier.fillMaxWidth()) {
+                    Text(if (uiState.userInfo == null) "重新登录" else "从面板刷新")
                 }
             }
         }

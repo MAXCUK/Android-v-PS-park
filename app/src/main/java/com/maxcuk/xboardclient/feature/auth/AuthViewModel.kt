@@ -38,6 +38,10 @@ class AuthViewModel(
         }
     }
 
+    fun disableAutoRestore() {
+        _uiState.value = _uiState.value.copy(hasLocalSession = false, restoringSession = false)
+    }
+
     fun preloadSite(baseUrl: String) {
         viewModelScope.launch {
             runCatching {

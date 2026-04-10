@@ -20,4 +20,8 @@ class AuthRepository(
     }
 
     suspend fun currentSession(): SessionEntity? = sessionDao.getSession()
+
+    suspend fun clearSession() {
+        sessionDao.clearSession()
+    }
 }
